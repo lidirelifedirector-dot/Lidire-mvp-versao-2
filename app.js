@@ -14,6 +14,7 @@ const defaultState = {
     estudos: [],
     treinos: [],
     hidratação: [],
+    alimentação: [],
     finanças: [],
     objetivos: [],
     família: []
