@@ -3,7 +3,7 @@ const STORAGE_KEY = "lidire-mvp-data";
 const defaultState = {
   user: {
     name: "Alice",
-    email: "",
+    email: "conta@lidire.com",
     age: "",
     phone: ""
   },
@@ -13,15 +13,15 @@ const defaultState = {
     compras: [],
     estudos: [],
     treinos: [],
-    hidratacao: [],
-    financas: [],
+    hidratação: [],
+    finanças: [],
     objetivos: [],
-    familia: []
+    família: []
   }
 };
 
 let state = loadState();
-let currentPage = "inicio";
+let currentPage = "início";
 let modal = null;
 
 function loadState() {
@@ -114,12 +114,12 @@ const modules = [
   ["estudos", "Estudos", "Organize seu aprendizado", "book", "estudos"],
   ["treinos", "Treinos", "Movimente-se e acompanhe", "dumbbell", "treinos"],
   ["hidratacao", "Hidratação", "Cuide da sua rotina", "drop", "hidratacao"],
-  ["financas", "Finanças", "Entradas e gastos", "wallet", "financas"],
+  ["financas", "Finanças", "Entradas e gastos", "wallet", "finanças"],
   ["objetivos", "Objetivos", "Transforme planos em passos", "target", "objetivos"],
-  ["familia", "Família", "Compartilhe sua rotina", "family", "familia"]
+  ["familia", "Família", "Compartilhe sua rotina", "family", "família"]
 ];
 
-function appShell(content, title = "LiDire") {
+function appShell(content, title = "LiDire - Seu Copiloto para a Vida") {
   const nav = [
     ["inicio", "⌂", "Início"],
     ["agenda", "▣", "Agenda"],
