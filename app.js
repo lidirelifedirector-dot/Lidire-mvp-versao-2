@@ -207,9 +207,15 @@ function home() {
         </div>
       </div>
       <div class="hero-orbit">
-        <div class="orbit-center">L</div>
-        <span>Agenda</span><span>Tarefas</span><span>Metas</span><span>Você</span>
-      </div>
+        <div class="hero-orbit">
+  <div class="orbit-center">
+    <img src="/logo-lidire-oficial.png" alt="LiDire">
+  </div>
+  <span>Agenda</span>
+  <span>Tarefas</span>
+  <span>Metas</span>
+  <span>Você</span>
+</div>
     </section>
 
     <section class="section">
