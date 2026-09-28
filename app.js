@@ -2012,3 +2012,1151 @@ function financas() {
 
   });
 }
+/* =========================================================
+   OBJETIVOS
+   ========================================================= */
+
+function objetivos() {
+
+  return listPage({
+
+    key: "objetivos",
+
+    title: "Objetivos",
+
+    subtitle:
+      "Dê forma aos planos que você quer realizar.",
+
+    eyebrow: "DIREÇÃO",
+
+    render: x => `
+
+      <div class="goal-item">
+
+
+        <div class="goal-top">
+
+          <div>
+
+            <strong>
+              ${esc(x.title)}
+            </strong>
+
+            <span>
+
+              ${
+                x.deadline
+                  ? `Até ${dateBR(x.deadline)}`
+                  : "Sem prazo"
+              }
+
+            </span>
+
+          </div>
+
+
+          <b>
+            ${Number(x.progress || 0)}%
+          </b>
+
+        </div>
+
+
+        <div class="progress">
+
+          <span
+            style="width:${Math.min(
+              100,
+              Number(x.progress || 0)
+            )}%"
+          ></span>
+
+        </div>
+
+
+        <div class="goal-actions">
+
+          <button
+            data-action="progress-objetivo"
+            data-id="${x.id}"
+          >
+            Atualizar progresso
+          </button>
+
+
+          <button
+            data-action="delete-objetivo"
+            data-id="${x.id}"
+          >
+            Excluir
+          </button>
+
+        </div>
+
+
+      </div>
+
+    `
+
+  });
+}
+
+
+/* =========================================================
+   FAMÍLIA
+   ========================================================= */
+
+function familia() {
+
+  return listPage({
+
+    key: "familia",
+
+    title: "Família",
+
+    subtitle:
+      "Uma visão compartilhada para organizar a vida juntos.",
+
+    eyebrow: "COMPARTILHAMENTO",
+
+    emptyTitle:
+      "Ainda não há pessoas adicionadas",
+
+    emptyText:
+      "Cadastre pessoas para estruturar sua área familiar. A sincronização online será conectada ao D1 em uma próxima etapa.",
+
+    render: x => `
+
+      <div class="list-item">
+
+
+        <div class="avatar">
+
+          ${esc(
+            (x.name || "?")
+              .charAt(0)
+              .toUpperCase()
+          )}
+
+        </div>
+
+
+        <div class="item-main">
+
+          <strong>
+            ${esc(x.name)}
+          </strong>
+
+          <span>
+
+            ${esc(
+              x.relation || "Membro"
+            )}
+
+            ${
+              x.email
+                ? ` · ${esc(x.email)}`
+                : ""
+            }
+
+          </span>
+
+        </div>
+
+
+        <div class="item-actions">
+
+          <button
+            data-action="delete-familia"
+            data-id="${x.id}"
+          >
+            ${icon("trash")}
+          </button>
+
+        </div>
+
+
+      </div>
+
+    `
+
+  });
+}
+
+
+/* =========================================================
+   ASSISTENTE
+   ========================================================= */
+
+function assistente() {
+
+  const pending =
+    state.data.tarefas
+      .filter(x => !x.done);
+
+
+  const today =
+    state.data.compromissos
+      .filter(
+        x => x.date === todayISO()
+      );
+
+
+  return appShell(`
+
+    ${pageHeader(
+      "INTELIGÊNCIA",
+      "Assistente LiDire",
+      "Uma visão rápida da sua rotina para ajudar você a encontrar o próximo passo."
+    )}
+
+
+    <div class="assistant-screen">
+
+
+      <div class="assistant-avatar">
+        ✦
+      </div>
+
+
+      <h2>
+        Como posso ajudar?
+      </h2>
+
+
+      <p>
+        Experimente uma das sugestões abaixo.
+      </p>
+
+
+      <div class="suggestions">
+
+
+        <button
+          data-action="assistant-question"
+          data-question="O que tenho para hoje?"
+        >
+          O que tenho para hoje?
+        </button>
+
+
+        <button
+          data-action="assistant-question"
+          data-question="Quais tarefas estão pendentes?"
+        >
+          Quais tarefas estão pendentes?
+        </button>
+
+
+        <button
+          data-action="assistant-question"
+          data-question="Como está minha rotina?"
+        >
+          Como está minha rotina?
+        </button>
+
+
+      </div>
+
+
+      <div
+        id="assistant-response"
+        class="assistant-response"
+      >
+
+        <strong>
+          Resumo atual
+        </strong>
+
+        <p>
+
+          Você tem
+          <b>${pending.length}</b>
+          tarefa(s) pendente(s)
+
+          e
+
+          <b>${today.length}</b>
+          compromisso(s) hoje.
+
+        </p>
+
+      </div>
+
+
+    </div>
+
+  `);
+}
+
+
+/* =========================================================
+   EXPLORAR
+   ========================================================= */
+
+function explorar() {
+
+  return appShell(`
+
+    ${pageHeader(
+      "LIDIRE",
+      "Tudo em um só lugar",
+      "Conheça os espaços que ajudam a transformar rotina em clareza."
+    )}
+
+
+    <div class="explore-grid">
+
+      ${modules
+        .map(moduleCard)
+        .join("")}
+
+
+      <button
+        class="module-card featured"
+        data-page="assistente"
+      >
+
+        <span class="module-icon">
+          ✦
+        </span>
+
+
+        <span class="module-content">
+
+          <strong>
+            Assistente LiDire
+          </strong>
+
+          <small>
+            Seu copiloto para organizar a rotina.
+          </small>
+
+        </span>
+
+
+        <span class="module-arrow">
+          ${icon("arrow")}
+        </span>
+
+      </button>
+
+
+    </div>
+
+  `);
+}
+
+
+/* =========================================================
+   PERFIL
+   ========================================================= */
+
+function perfil() {
+
+  return appShell(`
+
+    ${pageHeader(
+      "MINHA CONTA",
+      "Perfil",
+      "Personalize sua experiência na LiDire."
+    )}
+
+
+    <div class="profile-card">
+
+
+      <div class="profile-avatar">
+
+        ${esc(
+          (state.user.name || "A")
+            .charAt(0)
+            .toUpperCase()
+        )}
+
+      </div>
+
+
+      <h2>
+        ${esc(
+          state.user.name || "Seu nome"
+        )}
+      </h2>
+
+
+      <p>
+        ${esc(
+          state.user.email ||
+          "Adicione seu e-mail"
+        )}
+      </p>
+
+
+      <button
+        class="primary-button"
+        data-action="edit-profile"
+      >
+        ${icon("edit")}
+        Editar perfil
+      </button>
+
+
+    </div>
+
+
+    <div class="settings-card">
+
+
+      <button
+        data-action="edit-profile"
+      >
+
+        <span>✎</span>
+
+        <div>
+
+          <strong>
+            Dados pessoais
+          </strong>
+
+          <small>
+            Nome, e-mail, idade e telefone
+          </small>
+
+        </div>
+
+        ${icon("arrow")}
+
+      </button>
+
+
+      <button
+        data-action="clear-local"
+      >
+
+        <span>↺</span>
+
+        <div>
+
+          <strong>
+            Redefinir dados locais
+          </strong>
+
+          <small>
+            Apaga os dados salvos neste dispositivo
+          </small>
+
+        </div>
+
+        ${icon("arrow")}
+
+      </button>
+
+
+    </div>
+
+  `);
+}
+
+
+/* =========================================================
+   PÁGINAS
+   ========================================================= */
+
+const pages = {
+
+  inicio: home,
+
+  agenda,
+
+  tarefas,
+
+  compras,
+
+  estudos,
+
+  treinos,
+
+  hidratacao,
+
+  financas,
+
+  objetivos,
+
+  familia,
+
+  assistente,
+
+  explorar,
+
+  perfil
+
+};
+
+
+/* =========================================================
+   RENDER
+   ========================================================= */
+
+function render() {
+
+  const root =
+    document.getElementById("app");
+
+
+  if (!root) return;
+
+
+  if (
+    currentPage === "compras" &&
+    currentShoppingList
+  ) {
+
+    root.innerHTML =
+      listaCompras(
+        currentShoppingList
+      );
+
+  } else {
+
+    root.innerHTML =
+      (
+        pages[currentPage] ||
+        home
+      )();
+
+  }
+
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
+
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+
+function openModal(
+  title,
+  body,
+  options = {}
+) {
+
+  closeModal();
+
+
+  modal =
+    document.createElement("div");
+
+
+  modal.className =
+    "modal-backdrop";
+
+
+  modal.innerHTML = `
+
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+    >
+
+
+      <div class="modal-header">
+
+
+        <div>
+
+          <span class="eyebrow">
+
+            ${esc(
+              options.eyebrow ||
+              "LIDIRE"
+            )}
+
+          </span>
+
+
+          <h2>
+            ${esc(title)}
+          </h2>
+
+        </div>
+
+
+        <button
+          class="modal-close"
+          data-action="close-modal"
+        >
+          ×
+        </button>
+
+
+      </div>
+
+
+      <form
+        id="lidire-form"
+        class="form-grid"
+      >
+
+        ${body}
+
+
+        <div class="modal-footer">
+
+
+          <button
+            type="button"
+            class="ghost-button"
+            data-action="close-modal"
+          >
+            Cancelar
+          </button>
+
+
+          <button
+            class="primary-button"
+            type="submit"
+          >
+            ${esc(
+              options.submit ||
+              "Salvar"
+            )}
+          </button>
+
+
+        </div>
+
+
+      </form>
+
+
+    </div>
+
+  `;
+
+
+  document.body.appendChild(modal);
+
+
+  modal
+    .querySelector(
+      "input, select, textarea"
+    )
+    ?.focus();
+}
+
+
+function closeModal() {
+
+  document
+    .querySelector(
+      ".modal-backdrop"
+    )
+    ?.remove();
+
+  modal = null;
+}
+
+
+/* =========================================================
+   CAMPOS DE FORMULÁRIO
+   ========================================================= */
+
+function field(
+  label,
+  name,
+  type = "text",
+  value = "",
+  extra = ""
+) {
+
+  return `
+
+    <label class="form-field">
+
+      <span>
+        ${esc(label)}
+      </span>
+
+      <input
+        name="${esc(name)}"
+        type="${type}"
+        value="${esc(value)}"
+        ${extra}
+      >
+
+    </label>
+
+  `;
+}
+
+
+/* =========================================================
+   CRIAÇÃO DE LISTA DE COMPRAS
+   ========================================================= */
+
+function adicionarListaCompras() {
+
+  openModal(
+
+    "Nova lista de compras",
+
+    `
+      ${field(
+        "Nome da lista",
+        "name",
+        "text",
+        "",
+        "required"
+      )}
+    `,
+
+    {
+      submit: "Criar lista"
+    }
+
+  );
+
+
+  modal
+    .querySelector(
+      "#lidire-form"
+    )
+    .onsubmit = e => {
+
+      e.preventDefault();
+
+
+      const f =
+        new FormData(e.target);
+
+
+      const lista = {
+
+        id: uid("lista"),
+
+        name: f.get("name"),
+
+        items: []
+
+      };
+
+
+      if (!state.data.compras) {
+
+        state.data.compras = [];
+
+      }
+
+
+      state.data.compras.push(
+        lista
+      );
+
+
+      saveState();
+
+      closeModal();
+
+      render();
+
+      toast("Lista criada.");
+
+    };
+}
+
+
+/* =========================================================
+   FORMULÁRIOS
+   ========================================================= */
+
+function addForm(key) {
+
+  if (key === "compromissos") {
+
+    openModal(
+      "Novo compromisso",
+
+      `
+        ${field(
+          "Título",
+          "title",
+          "text",
+          "",
+          "required"
+        )}
+
+        ${field(
+          "Data",
+          "date",
+          "date",
+          todayISO(),
+          "required"
+        )}
+
+        ${field(
+          "Horário",
+          "time"
+        )}
+
+        ${field(
+          "Local",
+          "location"
+        )}
+      `,
+
+      {
+        submit: "Adicionar"
+      }
+    );
+
+
+    modal
+      .querySelector("#lidire-form")
+      .onsubmit = e => {
+
+        e.preventDefault();
+
+        const f =
+          new FormData(e.target);
+
+
+        state.data.compromissos.push({
+
+          id: uid("c"),
+
+          title: f.get("title"),
+
+          date: f.get("date"),
+
+          time: f.get("time"),
+
+          location: f.get("location")
+
+        });
+
+
+        saveState();
+
+        closeModal();
+
+        render();
+
+        toast(
+          "Compromisso adicionado."
+        );
+
+      };
+
+
+  } else if (key === "tarefas") {
+
+    openModal(
+
+      "Nova tarefa",
+
+      `
+        ${field(
+          "Tarefa",
+          "title",
+          "text",
+          "",
+          "required"
+        )}
+
+        <label class="form-field">
+
+          <span>
+            Prioridade
+          </span>
+
+          <select name="priority">
+
+            <option value="">
+              Normal
+            </option>
+
+            <option>
+              Alta
+            </option>
+
+            <option>
+              Média
+            </option>
+
+            <option>
+              Baixa
+            </option>
+
+          </select>
+
+        </label>
+
+        ${field(
+          "Prazo",
+          "date"
+        )}
+      `,
+
+      {
+        submit: "Adicionar"
+      }
+
+    );
+
+
+    modal
+      .querySelector("#lidire-form")
+      .onsubmit = e => {
+
+        e.preventDefault();
+
+        const f =
+          new FormData(e.target);
+
+
+        state.data.tarefas.push({
+
+          id: uid("t"),
+
+          title: f.get("title"),
+
+          priority: f.get("priority"),
+
+          date: f.get("date"),
+
+          done: false
+
+        });
+
+
+        saveState();
+
+        closeModal();
+
+        render();
+
+        toast(
+          "Tarefa adicionada."
+        );
+
+      };
+
+
+  } else if (key === "compras") {
+
+    adicionarListaCompras();
+
+
+  } else if (key === "estudos") {
+
+    openModal(
+
+      "Nova sessão de estudo",
+
+      `
+        ${field(
+          "Matéria",
+          "subject",
+          "text",
+          "",
+          "required"
+        )}
+
+        ${field(
+          "Tema",
+          "topic"
+        )}
+
+        ${field(
+          "Duração (min)",
+          "duration",
+          "number"
+        )}
+      `,
+
+      {
+        submit: "Registrar"
+      }
+
+    );
+
+
+    modal
+      .querySelector("#lidire-form")
+      .onsubmit = e => {
+
+        e.preventDefault();
+
+        const f =
+          new FormData(e.target);
+
+
+        state.data.estudos.push({
+
+          id: uid("e"),
+
+          subject:
+            f.get("subject"),
+
+          topic:
+            f.get("topic"),
+
+          duration:
+            f.get("duration"),
+
+          done: false
+
+        });
+
+
+        saveState();
+
+        closeModal();
+
+        render();
+
+        toast(
+          "Estudo registrado."
+        );
+
+      };
+
+
+  } else if (key === "treinos") {
+
+    openModal(
+
+      "Novo treino",
+
+      `
+        ${field(
+          "Nome",
+          "name",
+          "text",
+          "",
+          "required"
+        )}
+
+        ${field(
+          "Tipo",
+          "type"
+        )}
+
+        ${field(
+          "Duração (min)",
+          "duration",
+          "number"
+        )}
+      `,
+
+      {
+        submit: "Registrar"
+      }
+
+    );
+
+
+    modal
+      .querySelector("#lidire-form")
+      .onsubmit = e => {
+
+        e.preventDefault();
+
+        const f =
+          new FormData(e.target);
+
+
+        state.data.treinos.push({
+
+          id: uid("tr"),
+
+          name:
+            f.get("name"),
+
+          type:
+            f.get("type"),
+
+          duration:
+            f.get("duration")
+
+        });
+
+
+        saveState();
+
+        closeModal();
+
+        render();
+
+        toast(
+          "Treino registrado."
+        );
+
+      };
+
+
+  } else if (key === "hidratacao") {
+
+    openModal(
+
+      "Registrar água",
+
+      `
+        ${field(
+          "Quantidade (ml)",
+          "amount",
+          "number",
+          "300",
+          "required"
+        )}
+      `,
+
+      {
+        submit: "Registrar"
+      }
+
+    );
+
+
+    modal
+      .querySelector("#lidire-form")
+      .onsubmit = e => {
+
+        e.preventDefault();
+
+        const f =
+          new FormData(e.target);
+
+
+        state.data.hidratacao.push({
+
+          id: uid("h"),
+
+          amount:
+            Number(
+              f.get("amount")
+            ),
+
+          createdAt:
+            new Date().toISOString()
+
+        });
+
+
+        saveState();
+
+        closeModal();
+
+        render();
+
+        toast(
+          "Hidratação registrada."
+        );
+
+      };
