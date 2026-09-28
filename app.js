@@ -1135,3 +1135,880 @@ function tarefas() {
 
   });
 }
+/* =========================================================
+   COMPRAS — LISTAS
+   ========================================================= */
+
+function compras() {
+
+  const listas =
+    state.data.compras || [];
+
+
+  return appShell(`
+
+    ${pageHeader(
+      "LISTAS",
+      "Compras",
+      "Organize suas compras em listas diferentes.",
+      `
+        <button
+          class="primary-button compact"
+          data-action="add-lista-compras"
+        >
+          ${icon("plus")}
+          Nova lista
+        </button>
+      `
+    )}
+
+
+    <div class="shopping-lists">
+
+
+      ${
+        listas.length
+
+          ? listas.map(lista => {
+
+              const total =
+                lista.items?.length || 0;
+
+              const done =
+                lista.items
+                  ?.filter(item => item.done)
+                  .length || 0;
+
+
+              return `
+
+                <div class="shopping-list-card">
+
+
+                  <button
+                    class="shopping-list-main"
+                    data-action="open-lista-compras"
+                    data-id="${lista.id}"
+                  >
+
+                    <div class="shopping-list-icon">
+                      🛒
+                    </div>
+
+
+                    <div class="shopping-list-info">
+
+                      <strong>
+                        ${esc(lista.name)}
+                      </strong>
+
+                      <span>
+
+                        ${total}
+
+                        ${
+                          total === 1
+                            ? "item"
+                            : "itens"
+                        }
+
+                        ·
+
+                        ${done}
+
+                        ${
+                          done === 1
+                            ? "concluído"
+                            : "concluídos"
+                        }
+
+                      </span>
+
+                    </div>
+
+
+                    <span class="module-arrow">
+                      ${icon("arrow")}
+                    </span>
+
+                  </button>
+
+
+                  <button
+                    class="shopping-list-delete"
+                    data-action="delete-lista-compras"
+                    data-id="${lista.id}"
+                    title="Excluir lista"
+                  >
+                    ${icon("trash")}
+                  </button>
+
+
+                </div>
+
+              `;
+
+            }).join("")
+
+
+          : `
+
+            <div class="content-card">
+
+              ${emptyState(
+                "Nenhuma lista criada",
+
+                "Crie sua primeira lista de compras para começar a organizar seus itens.",
+
+                "Criar lista",
+
+                "add-lista-compras"
+              )}
+
+            </div>
+
+          `
+      }
+
+
+    </div>
+
+  `);
+}
+
+
+/* =========================================================
+   LISTA DE COMPRAS INDIVIDUAL
+   ========================================================= */
+
+function listaCompras(id) {
+
+  const lista =
+    state.data.compras.find(
+      x => x.id === id
+    );
+
+
+  if (!lista) {
+
+    currentPage = "compras";
+
+    currentShoppingList = null;
+
+    render();
+
+    return;
+  }
+
+
+  const items =
+    lista.items || [];
+
+  const done =
+    items.filter(x => x.done).length;
+
+
+  return appShell(`
+
+    <div class="shopping-back">
+
+      <button
+        class="text-button"
+        data-action="back-compras"
+      >
+
+        ${icon("back")}
+
+        Voltar para compras
+
+      </button>
+
+    </div>
+
+
+    ${pageHeader(
+
+      "LISTA DE COMPRAS",
+
+      lista.name,
+
+      `
+        ${items.length}
+        ${
+          items.length === 1
+            ? "item"
+            : "itens"
+        }
+
+        ·
+
+        ${done}
+        ${
+          done === 1
+            ? "concluído"
+            : "concluídos"
+        }
+      `,
+
+      `
+        <button
+          class="primary-button compact"
+          data-action="add-item-compra"
+          data-id="${lista.id}"
+        >
+          ${icon("plus")}
+          Adicionar item
+        </button>
+      `
+
+    )}
+
+
+    <div class="content-card">
+
+
+      <div class="card-toolbar">
+
+        <div class="toolbar-title">
+
+          ${done}/${items.length}
+
+          concluídos
+
+        </div>
+
+      </div>
+
+
+      ${
+        items.length
+
+          ? `
+
+            <div class="item-list">
+
+              ${items.map(item => `
+
+                <div class="list-item ${
+                  item.done
+                    ? "completed"
+                    : ""
+                }">
+
+
+                  <button
+                    class="check-button ${
+                      item.done
+                        ? "checked"
+                        : ""
+                    }"
+                    data-action="toggle-item-compra"
+                    data-list-id="${lista.id}"
+                    data-id="${item.id}"
+                  >
+                    ${
+                      item.done
+                        ? "✓"
+                        : ""
+                    }
+                  </button>
+
+
+                  <div class="item-main">
+
+                    <strong>
+                      ${esc(item.name)}
+                    </strong>
+
+
+                    <span>
+
+                      ${
+                        item.quantity
+                          ? esc(item.quantity)
+                          : ""
+                      }
+
+                      ${
+                        item.category
+                          ? ` · ${esc(item.category)}`
+                          : ""
+                      }
+
+                    </span>
+
+                  </div>
+
+
+                  <div class="item-actions">
+
+                    <button
+                      data-action="delete-item-compra"
+                      data-list-id="${lista.id}"
+                      data-id="${item.id}"
+                    >
+                      ${icon("trash")}
+                    </button>
+
+                  </div>
+
+
+                </div>
+
+              `).join("")}
+
+            </div>
+
+          `
+
+          : `
+
+            <div class="empty-state">
+
+              <div class="empty-orb">
+                🛒
+              </div>
+
+              <h3>
+                Lista vazia
+              </h3>
+
+              <p>
+                Adicione o primeiro item desta lista.
+              </p>
+
+              <button
+                class="primary-button"
+                data-action="add-item-compra"
+                data-id="${lista.id}"
+              >
+                ${icon("plus")}
+                Adicionar item
+              </button>
+
+            </div>
+
+          `
+      }
+
+
+    </div>
+
+  `);
+}
+
+
+/* =========================================================
+   ESTUDOS
+   ========================================================= */
+
+function estudos() {
+
+  return listPage({
+
+    key: "estudos",
+
+    title: "Estudos",
+
+    subtitle:
+      "Acompanhe matérias, sessões e seu progresso.",
+
+    eyebrow: "APRENDIZADO",
+
+    render: x => `
+
+      <div class="list-item ${
+        x.done
+          ? "completed"
+          : ""
+      }">
+
+
+        <button
+          class="check-button ${
+            x.done
+              ? "checked"
+              : ""
+          }"
+          data-action="toggle-estudo"
+          data-id="${x.id}"
+        >
+          ${x.done ? "✓" : ""}
+        </button>
+
+
+        <div class="item-main">
+
+          <strong>
+            ${esc(x.subject)}
+          </strong>
+
+          <span>
+
+            ${
+              x.topic
+                ? esc(x.topic)
+                : "Sessão de estudo"
+            }
+
+            ${
+              x.duration
+                ? ` · ${esc(x.duration)} min`
+                : ""
+            }
+
+          </span>
+
+        </div>
+
+
+        <div class="item-actions">
+
+          <button
+            data-action="delete-estudo"
+            data-id="${x.id}"
+          >
+            ${icon("trash")}
+          </button>
+
+        </div>
+
+      </div>
+
+    `
+
+  });
+}
+
+
+/* =========================================================
+   TREINOS
+   ========================================================= */
+
+function treinos() {
+
+  return listPage({
+
+    key: "treinos",
+
+    title: "Treinos",
+
+    subtitle:
+      "Registre seus movimentos e mantenha constância.",
+
+    eyebrow: "BEM-ESTAR",
+
+    render: x => `
+
+      <div class="list-item">
+
+
+        <div class="module-icon small">
+          ♢
+        </div>
+
+
+        <div class="item-main">
+
+          <strong>
+            ${esc(x.name)}
+          </strong>
+
+          <span>
+
+            ${
+              x.type || "Treino"
+            }
+
+            ${
+              x.duration
+                ? ` · ${esc(x.duration)} min`
+                : ""
+            }
+
+          </span>
+
+        </div>
+
+
+        <div class="item-actions">
+
+          <button
+            data-action="delete-treino"
+            data-id="${x.id}"
+          >
+            ${icon("trash")}
+          </button>
+
+        </div>
+
+
+      </div>
+
+    `
+
+  });
+}
+
+
+/* =========================================================
+   HIDRATAÇÃO
+   ========================================================= */
+
+function hidratacao() {
+
+  const total =
+    state.data.hidratacao
+      .reduce(
+        (s, x) =>
+          s + Number(x.amount || 0),
+        0
+      );
+
+
+  const goal = 2000;
+
+
+  const pct =
+    Math.min(
+      100,
+      Math.round(total / goal * 100)
+    );
+
+
+  return appShell(`
+
+    ${pageHeader(
+
+      "BEM-ESTAR",
+
+      "Hidratação",
+
+      "Pequenos registros ajudam a cuidar da sua rotina.",
+
+      `
+        <button
+          class="primary-button compact"
+          data-action="add-hidratacao"
+        >
+          ${icon("plus")}
+          Registrar
+        </button>
+      `
+
+    )}
+
+
+    <div class="hydration-card">
+
+
+      <div class="hydration-top">
+
+        <div>
+
+          <span class="eyebrow">
+            HOJE
+          </span>
+
+          <h2>
+            ${total} ml
+          </h2>
+
+          <p>
+            de ${goal} ml registrados
+          </p>
+
+        </div>
+
+
+        <div class="water-drop">
+          ◉
+        </div>
+
+      </div>
+
+
+      <div class="progress">
+
+        <span
+          style="width:${pct}%"
+        ></span>
+
+      </div>
+
+
+      <div class="progress-labels">
+
+        <span>0 ml</span>
+
+        <strong>
+          ${pct}%
+        </strong>
+
+        <span>
+          ${goal} ml
+        </span>
+
+      </div>
+
+
+      <div class="quick-water">
+
+        ${[200, 300, 500]
+          .map(v => `
+
+            <button
+              data-action="quick-water"
+              data-value="${v}"
+            >
+              +${v} ml
+            </button>
+
+          `)
+          .join("")}
+
+      </div>
+
+
+    </div>
+
+
+    <div class="content-card">
+
+
+      <div class="card-toolbar">
+
+        <div class="toolbar-title">
+          Registros de hoje
+        </div>
+
+
+        <button
+          class="text-button"
+          data-action="reset-hidratacao"
+        >
+          Limpar
+        </button>
+
+      </div>
+
+
+      ${
+        state.data.hidratacao.length
+
+          ? `
+
+            <div class="item-list">
+
+              ${state.data.hidratacao
+                .map(x => `
+
+                  <div class="list-item">
+
+                    <div class="module-icon small">
+                      ◉
+                    </div>
+
+                    <div class="item-main">
+
+                      <strong>
+                        ${x.amount} ml
+                      </strong>
+
+                      <span>
+
+                        ${
+                          new Date(
+                            x.createdAt
+                          ).toLocaleTimeString(
+                            "pt-BR",
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit"
+                            }
+                          )
+                        }
+
+                      </span>
+
+                    </div>
+
+
+                    <div class="item-actions">
+
+                      <button
+                        data-action="delete-hidratacao"
+                        data-id="${x.id}"
+                      >
+                        ${icon("trash")}
+                      </button>
+
+                    </div>
+
+                  </div>
+
+                `)
+                .join("")}
+
+            </div>
+
+          `
+
+          : `
+
+            <p class="muted">
+              Nenhum registro hoje.
+            </p>
+
+          `
+      }
+
+
+    </div>
+
+  `);
+}
+
+
+/* =========================================================
+   FINANÇAS
+   ========================================================= */
+
+function financas() {
+
+  const income =
+    state.data.financas
+      .filter(x => x.type === "income")
+      .reduce(
+        (s, x) =>
+          s + Number(x.value),
+        0
+      );
+
+
+  const expense =
+    state.data.financas
+      .filter(x => x.type === "expense")
+      .reduce(
+        (s, x) =>
+          s + Number(x.value),
+        0
+      );
+
+
+  return listPage({
+
+    key: "financas",
+
+    title: "Finanças",
+
+    subtitle:
+      "Tenha uma visão simples do que entra e sai.",
+
+    eyebrow: "DINHEIRO",
+
+    stats: () => `
+
+      ${statCard(
+        money(income),
+        "Entradas",
+        "cyan"
+      )}
+
+      ${statCard(
+        money(expense),
+        "Saídas",
+        "pink"
+      )}
+
+      ${statCard(
+        money(income - expense),
+        "Saldo",
+        "purple"
+      )}
+
+    `,
+
+    render: x => `
+
+      <div class="list-item">
+
+
+        <div class="finance-icon ${x.type}">
+
+          ${
+            x.type === "income"
+              ? "↑"
+              : "↓"
+          }
+
+        </div>
+
+
+        <div class="item-main">
+
+          <strong>
+            ${esc(x.title)}
+          </strong>
+
+          <span>
+
+            ${dateBR(
+              x.date || todayISO()
+            )}
+
+            ·
+
+            ${
+              x.category
+                ? esc(x.category)
+                : "Geral"
+            }
+
+          </span>
+
+        </div>
+
+
+        <strong
+          class="finance-value ${x.type}"
+        >
+
+          ${
+            x.type === "income"
+              ? "+"
+              : "-"
+          }
+
+          ${money(x.value)}
+
+        </strong>
+
+
+        <div class="item-actions">
+
+          <button
+            data-action="delete-financa"
+            data-id="${x.id}"
+          >
+            ${icon("trash")}
+          </button>
+
+        </div>
+
+
+      </div>
+
+    `,
+
+    filter: `
+      <button
+        class="filter-button"
+        data-action="add-financa"
+      >
+        + Entrada / saída
+      </button>
+    `
+
+  });
+}
