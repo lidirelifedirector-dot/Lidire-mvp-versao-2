@@ -680,9 +680,8 @@ function addForm(key) {
       saveState(); closeModal(); render(); toast("Tarefa adicionada.");
     };
   } else if (key === "compras") {
-    openModal("Novo item", `${field("Item","name","text","", "required")}${field("Quantidade","quantity")}${field("Categoria","category")}`, {submit:"Adicionar"});
-    modal.querySelector("#lidire-form").onsubmit = e => { const f=new FormData(e.target); state.data.compras.push({id:uid("p"),name:f.get("name"),quantity:f.get("quantity"),category:f.get("category"),done:false}); saveState(); closeModal(); render(); toast("Item adicionado."); };
-  } else if (key === "estudos") {
+  adicionarListaCompras();
+} else if (key === "estudos") {
     openModal("Nova sessão de estudo", `${field("Matéria","subject","text","", "required")}${field("Tema","topic")}${field("Duração (min)","duration","number")}`, {submit:"Registrar"});
     modal.querySelector("#lidire-form").onsubmit = e => { const f=new FormData(e.target); state.data.estudos.push({id:uid("e"),subject:f.get("subject"),topic:f.get("topic"),duration:f.get("duration"),done:false}); saveState(); closeModal(); render(); toast("Estudo registrado."); };
   } else if (key === "treinos") {
