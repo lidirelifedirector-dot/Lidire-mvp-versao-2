@@ -387,6 +387,96 @@ function compras() {
     </div>
   `);
 }
+function listaCompras(id) {
+  const lista = state.data.compras.find(x => x.id === id);
+
+  if (!lista) {
+    currentPage = "compras";
+    currentShoppingList = null;
+    render();
+    return;
+  }
+
+  const items = lista.items || [];
+  const done = items.filter(x => x.done).length;
+
+  return appShell(`
+    <div class="shopping-back">
+      <button class="text-button" data-action="back-compras">
+        ${icon("back")} Voltar para compras
+      </button>
+    </div>
+
+    ${pageHeader(
+      "LISTA DE COMPRAS",
+      lista.name,
+      `${items.length} ${items.length === 1 ? "item" : "itens"} · ${done} concluído${done === 1 ? "" : "s"}`,
+      `<button class="primary-button compact" data-action="add-item-compra" data-id="${lista.id}">
+        ${icon("plus")} Adicionar item
+      </button>`
+    )}
+
+    <div class="content-card">
+      <div class="card-toolbar">
+        <div class="toolbar-title">
+          ${done}/${items.length} concluídos
+        </div>
+      </div>
+
+      ${
+        items.length
+          ? `<div class="item-list">
+              ${items.map(item => `
+                <div class="list-item ${item.done ? "completed" : ""}">
+
+                  <button
+                    class="check-button ${item.done ? "checked" : ""}"
+                    data-action="toggle-item-compra"
+                    data-list-id="${lista.id}"
+                    data-id="${item.id}"
+                  >
+                    ${item.done ? "✓" : ""}
+                  </button>
+
+                  <div class="item-main">
+                    <strong>${esc(item.name)}</strong>
+                    <span>
+                      ${item.quantity ? esc(item.quantity) : ""}
+                      ${item.category ? ` · ${esc(item.category)}` : ""}
+                    </span>
+                  </div>
+
+                  <div class="item-actions">
+                    <button
+                      data-action="delete-item-compra"
+                      data-list-id="${lista.id}"
+                      data-id="${item.id}"
+                    >
+                      ${icon("trash")}
+                    </button>
+                  </div>
+
+                </div>
+              `).join("")}
+            </div>`
+          : `
+            <div class="empty-state">
+              <div class="empty-orb">🛒</div>
+              <h3>Lista vazia</h3>
+              <p>Adicione o primeiro item desta lista.</p>
+              <button
+                class="primary-button"
+                data-action="add-item-compra"
+                data-id="${lista.id}"
+              >
+                ${icon("plus")} Adicionar item
+              </button>
+            </div>
+          `
+      }
+    </div>
+  `);
+}
 
 function estudos() {
   return listPage({
