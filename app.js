@@ -632,7 +632,13 @@ const pages = { inicio: home, agenda, tarefas, compras, estudos, treinos, hidrat
 
 function render() {
   const root = document.getElementById("app");
-  root.innerHTML = (pages[currentPage] || home)();
+
+  if (currentPage === "compras" && currentShoppingList) {
+    root.innerHTML = listaCompras(currentShoppingList);
+  } else {
+    root.innerHTML = (pages[currentPage] || home)();
+  }
+
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
