@@ -331,19 +331,61 @@ function tarefas() {
 }
 
 function compras() {
-  return listPage({
-    key: "compras",
-    title: "Compras",
-    subtitle: "Sua lista sempre à mão.",
-    eyebrow: "LISTAS",
-    emptyTitle: "Sua lista está vazia",
-    render: (x) => `
-      <div class="list-item ${x.done ? "completed" : ""}">
-        <button class="check-button ${x.done ? "checked" : ""}" data-action="toggle-compra" data-id="${x.id}">${x.done ? "✓" : ""}</button>
-        <div class="item-main"><strong>${esc(x.name)}</strong><span>${x.category ? esc(x.category) : "Sem categoria"}${x.quantity ? ` · ${esc(x.quantity)}` : ""}</span></div>
-        <div class="item-actions"><button data-action="delete-compra" data-id="${x.id}">${icon("trash")}</button></div>
-      </div>`
-  });
+  const listas = state.data.compras || [];
+
+  return appShell(`
+    ${pageHeader(
+      "LISTAS",
+      "Compras",
+      "Organize suas compras em listas diferentes.",
+      `<button class="primary-button compact" data-action="add-lista-compras">${icon("plus")} Nova lista</button>`
+    )}
+
+    <div class="shopping-lists">
+
+      ${listas.length ? listas.map(lista => {
+        const total = lista.items?.length || 0;
+        const done = lista.items?.filter(item => item.done).length || 0;
+
+        return `
+          <div class="shopping-list-card">
+            <button
+              class="shopping-list-main"
+              data-action="open-lista-compras"
+              data-id="${lista.id}"
+            >
+              <div class="shopping-list-icon">🛒</div>
+
+              <div class="shopping-list-info">
+                <strong>${esc(lista.name)}</strong>
+                <span>${total} ${total === 1 ? "item" : "itens"} · ${done} concluído${done === 1 ? "" : "s"}</span>
+              </div>
+
+              <span class="module-arrow">${icon("arrow")}</span>
+            </button>
+
+            <button
+              class="shopping-list-delete"
+              data-action="delete-lista-compras"
+              data-id="${lista.id}"
+              title="Excluir lista"
+            >
+              ${icon("trash")}
+            </button>
+          </div>
+        `;
+      }).join("") : `
+        <div class="content-card">
+          ${emptyState(
+            "Nenhuma lista criada",
+            "Crie sua primeira lista de compras para começar a organizar seus itens.",
+            "Criar lista",
+            "add-lista-compras"
+          )}
+        </div>
+      `}
+    </div>
+  `);
 }
 
 function estudos() {
