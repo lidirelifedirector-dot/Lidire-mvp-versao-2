@@ -3160,3 +3160,1624 @@ function addForm(key) {
         );
 
       };
+  } else if (key === "financas") {
+
+    openModal(
+
+      "Novo lançamento",
+
+      `
+        <label class="form-field">
+
+          <span>
+            Tipo
+          </span>
+
+          <select name="type">
+
+            <option value="expense">
+              Saída
+            </option>
+
+            <option value="income">
+              Entrada
+            </option>
+
+          </select>
+
+        </label>
+
+
+        ${field(
+          "Descrição",
+          "title",
+          "text",
+          "",
+          "required"
+        )}
+
+
+        ${field(
+          "Valor",
+          "value",
+          "number",
+          "",
+          'step="0.01" min="0" required'
+        )}
+
+
+        ${field(
+          "Categoria",
+          "category"
+        )}
+
+
+        ${field(
+          "Data",
+          "date",
+          "date",
+          todayISO()
+        )}
+      `,
+
+      {
+        submit: "Salvar"
+      }
+
+    );
+
+
+    modal
+      .querySelector("#lidire-form")
+      .onsubmit = e => {
+
+        e.preventDefault();
+
+        const f =
+          new FormData(e.target);
+
+
+        state.data.financas.push({
+
+          id: uid("f"),
+
+          type:
+            f.get("type"),
+
+          title:
+            f.get("title"),
+
+          value:
+            Number(
+              f.get("value")
+            ),
+
+          category:
+            f.get("category"),
+
+          date:
+            f.get("date")
+
+        });
+
+
+        saveState();
+
+        closeModal();
+
+        render();
+
+        toast(
+          "Lançamento salvo."
+        );
+
+      };
+
+
+  } else if (key === "objetivos") {
+
+    openModal(
+
+      "Novo objetivo",
+
+      `
+        ${field(
+          "Objetivo",
+          "title",
+          "text",
+          "",
+          "required"
+        )}
+
+        ${field(
+          "Prazo",
+          "deadline",
+          "date"
+        )}
+
+        ${field(
+          "Progresso (%)",
+          "progress",
+          "number",
+          "0",
+          'min="0" max="100"'
+        )}
+      `,
+
+      {
+        submit: "Criar objetivo"
+      }
+
+    );
+
+
+    modal
+      .querySelector("#lidire-form")
+      .onsubmit = e => {
+
+        e.preventDefault();
+
+        const f =
+          new FormData(e.target);
+
+
+        state.data.objetivos.push({
+
+          id: uid("o"),
+
+          title:
+            f.get("title"),
+
+          deadline:
+            f.get("deadline"),
+
+          progress:
+            Number(
+              f.get("progress") || 0
+            )
+
+        });
+
+
+        saveState();
+
+        closeModal();
+
+        render();
+
+        toast(
+          "Objetivo criado."
+        );
+
+      };
+
+
+  } else if (key === "familia") {
+
+    openModal(
+
+      "Adicionar pessoa",
+
+      `
+        ${field(
+          "Nome",
+          "name",
+          "text",
+          "",
+          "required"
+        )}
+
+        ${field(
+          "Relação",
+          "relation"
+        )}
+
+        ${field(
+          "E-mail",
+          "email",
+          "email"
+        )}
+      `,
+
+      {
+        submit: "Adicionar"
+      }
+
+    );
+
+
+    modal
+      .querySelector("#lidire-form")
+      .onsubmit = e => {
+
+        e.preventDefault();
+
+        const f =
+          new FormData(e.target);
+
+
+        state.data.familia.push({
+
+          id: uid("m"),
+
+          name:
+            f.get("name"),
+
+          relation:
+            f.get("relation"),
+
+          email:
+            f.get("email")
+
+        });
+
+
+        saveState();
+
+        closeModal();
+
+        render();
+
+        toast(
+          "Pessoa adicionada."
+        );
+
+      };
+
+  }
+
+}
+
+
+/* =========================================================
+   EDIÇÃO DE ITENS
+   ========================================================= */
+
+function editItem(type, id) {
+
+  const key =
+    type === "compromisso"
+      ? "compromissos"
+      : "tarefas";
+
+
+  const item =
+    state.data[key].find(
+      x => x.id === id
+    );
+
+
+  if (!item) return;
+
+
+  if (type === "compromisso") {
+
+    openModal(
+
+      "Editar compromisso",
+
+      `
+        ${field(
+          "Título",
+          "title",
+          "text",
+          item.title,
+          "required"
+        )}
+
+        ${field(
+          "Data",
+          "date",
+          "date",
+          item.date,
+          "required"
+        )}
+
+        ${field(
+          "Horário",
+          "time",
+          "time",
+          item.time || ""
+        )}
+
+        ${field(
+          "Local",
+          "location",
+          "text",
+          item.location || ""
+        )}
+      `,
+
+      {
+        submit: "Salvar"
+      }
+
+    );
+
+  } else {
+
+    openModal(
+
+      "Editar tarefa",
+
+      `
+        ${field(
+          "Tarefa",
+          "title",
+          "text",
+          item.title,
+          "required"
+        )}
+
+
+        <label class="form-field">
+
+          <span>
+            Prioridade
+          </span>
+
+          <select name="priority">
+
+            <option ${
+              item.priority === ""
+                ? "selected"
+                : ""
+            }>
+              Normal
+            </option>
+
+            <option ${
+              item.priority === "Alta"
+                ? "selected"
+                : ""
+            }>
+              Alta
+            </option>
+
+            <option ${
+              item.priority === "Média"
+                ? "selected"
+                : ""
+            }>
+              Média
+            </option>
+
+            <option ${
+              item.priority === "Baixa"
+                ? "selected"
+                : ""
+            }>
+              Baixa
+            </option>
+
+          </select>
+
+        </label>
+
+
+        ${field(
+          "Prazo",
+          "date",
+          "date",
+          item.date || ""
+        )}
+      `,
+
+      {
+        submit: "Salvar"
+      }
+
+    );
+
+  }
+
+
+  modal
+    .querySelector("#lidire-form")
+    .onsubmit = e => {
+
+      e.preventDefault();
+
+
+      const f =
+        new FormData(e.target);
+
+
+      Object.assign(
+        item,
+        Object.fromEntries(
+          f.entries()
+        )
+      );
+
+
+      saveState();
+
+      closeModal();
+
+      render();
+
+      toast(
+        "Alterações salvas."
+      );
+
+    };
+}
+
+
+/* =========================================================
+   REMOVER ITEM
+   ========================================================= */
+
+function removeItem(
+  key,
+  id,
+  message = "Item removido."
+) {
+
+  state.data[key] =
+    state.data[key].filter(
+      x => x.id !== id
+    );
+
+
+  saveState();
+
+  render();
+
+  toast(message);
+}
+
+
+/* =========================================================
+   AÇÕES
+   ========================================================= */
+
+function handleAction(
+  action,
+  el
+) {
+
+
+  /* -------------------------------------------------------
+     ADIÇÃO RÁPIDA
+     ------------------------------------------------------- */
+
+  if (action === "quick-add") {
+
+    openModal(
+
+      "O que você quer adicionar?",
+
+      `
+        <div class="quick-actions">
+
+          ${[
+
+            [
+              "compromissos",
+              "▣",
+              "Compromisso"
+            ],
+
+            [
+              "tarefas",
+              "✓",
+              "Tarefa"
+            ],
+
+            [
+              "compras",
+              "🛒",
+              "Lista de compras"
+            ],
+
+            [
+              "estudos",
+              "▤",
+              "Estudo"
+            ],
+
+            [
+              "treinos",
+              "♢",
+              "Treino"
+            ],
+
+            [
+              "hidratacao",
+              "◉",
+              "Água"
+            ],
+
+            [
+              "financas",
+              "R$",
+              "Finança"
+            ],
+
+            [
+              "objetivos",
+              "◎",
+              "Objetivo"
+            ],
+
+            [
+              "familia",
+              "♧",
+              "Pessoa"
+            ]
+
+          ]
+          .map(
+            x => `
+
+              <button
+                type="button"
+                class="quick-option"
+                data-action="quick-option"
+                data-key="${x[0]}"
+              >
+
+                <span>
+                  ${x[1]}
+                </span>
+
+                ${x[2]}
+
+              </button>
+
+            `
+          )
+          .join("")}
+
+        </div>
+      `,
+
+      {
+        submit: "Fechar"
+      }
+
+    );
+
+
+    modal
+      .querySelector(
+        ".modal-footer"
+      )
+      .style.display = "none";
+
+
+    return;
+  }
+
+
+  /* -------------------------------------------------------
+     OPÇÃO DE ADIÇÃO RÁPIDA
+     ------------------------------------------------------- */
+
+  if (action === "quick-option") {
+
+    const key =
+      el.dataset.key;
+
+
+    closeModal();
+
+    addForm(key);
+
+    return;
+  }
+
+
+  /* -------------------------------------------------------
+     FECHAR MODAL
+     ------------------------------------------------------- */
+
+  if (action === "close-modal") {
+
+    closeModal();
+
+    return;
+  }
+
+
+  /* -------------------------------------------------------
+     ADICIONAR
+     ------------------------------------------------------- */
+
+  if (
+    action.startsWith("add-")
+  ) {
+
+    addForm(
+      action.slice(4)
+    );
+
+    return;
+  }
+
+
+  const id =
+    el.dataset.id;
+
+
+  /* =======================================================
+     COMPRAS — LISTAS
+     ======================================================= */
+
+
+  if (
+    action === "open-lista-compras"
+  ) {
+
+    currentPage = "compras";
+
+    currentShoppingList = id;
+
+    render();
+
+    return;
+  }
+
+
+  if (
+    action === "back-compras"
+  ) {
+
+    currentPage = "compras";
+
+    currentShoppingList = null;
+
+    render();
+
+    return;
+  }
+
+
+  if (
+    action === "delete-lista-compras"
+  ) {
+
+    if (
+      confirm(
+        "Excluir esta lista de compras?"
+      )
+    ) {
+
+      state.data.compras =
+        state.data.compras.filter(
+          lista =>
+            lista.id !== id
+        );
+
+
+      currentShoppingList =
+        null;
+
+
+      saveState();
+
+      render();
+
+      toast(
+        "Lista excluída."
+      );
+    }
+
+    return;
+  }
+
+
+  /* =======================================================
+     ADICIONAR ITEM DENTRO DA LISTA
+     ======================================================= */
+
+  if (
+    action === "add-item-compra"
+  ) {
+
+    const lista =
+      state.data.compras.find(
+        lista =>
+          lista.id === id
+      );
+
+
+    if (!lista) return;
+
+
+    if (!lista.items) {
+      lista.items = [];
+    }
+
+
+    openModal(
+
+      "Adicionar item",
+
+      `
+        ${field(
+          "Item",
+          "name",
+          "text",
+          "",
+          "required"
+        )}
+
+        ${field(
+          "Quantidade",
+          "quantity"
+        )}
+
+        ${field(
+          "Categoria",
+          "category"
+        )}
+      `,
+
+      {
+        submit: "Adicionar"
+      }
+
+    );
+
+
+    modal
+      .querySelector("#lidire-form")
+      .onsubmit = e => {
+
+        e.preventDefault();
+
+
+        const f =
+          new FormData(e.target);
+
+
+        lista.items.push({
+
+          id: uid("item"),
+
+          name:
+            f.get("name"),
+
+          quantity:
+            f.get("quantity"),
+
+          category:
+            f.get("category"),
+
+          done: false
+
+        });
+
+
+        saveState();
+
+        closeModal();
+
+        render();
+
+        toast(
+          "Item adicionado."
+        );
+
+      };
+
+
+    return;
+  }
+
+
+  /* =======================================================
+     MARCAR ITEM DE COMPRA
+     ======================================================= */
+
+  if (
+    action === "toggle-item-compra"
+  ) {
+
+    const lista =
+      state.data.compras.find(
+        lista =>
+          lista.id ===
+          el.dataset.listId
+      );
+
+
+    if (!lista) return;
+
+
+    if (!lista.items) {
+      lista.items = [];
+    }
+
+
+    const item =
+      lista.items.find(
+        item =>
+          item.id === id
+      );
+
+
+    if (!item) return;
+
+
+    item.done =
+      !item.done;
+
+
+    saveState();
+
+    render();
+
+    return;
+  }
+
+
+  /* =======================================================
+     EXCLUIR ITEM DE COMPRA
+     ======================================================= */
+
+  if (
+    action === "delete-item-compra"
+  ) {
+
+    const lista =
+      state.data.compras.find(
+        lista =>
+          lista.id ===
+          el.dataset.listId
+      );
+
+
+    if (!lista) return;
+
+
+    lista.items =
+      (lista.items || [])
+        .filter(
+          item =>
+            item.id !== id
+        );
+
+
+    saveState();
+
+    render();
+
+    toast(
+      "Item removido."
+    );
+
+    return;
+  }
+
+
+  /* =======================================================
+     TAREFAS
+     ======================================================= */
+
+  if (
+    action === "toggle-tarefa"
+  ) {
+
+    const x =
+      state.data.tarefas.find(
+        i => i.id === id
+      );
+
+
+    if (x) {
+      x.done =
+        !x.done;
+    }
+
+
+    saveState();
+
+    render();
+
+    return;
+  }
+
+
+  /* =======================================================
+     ESTUDOS
+     ======================================================= */
+
+  if (
+    action === "toggle-estudo"
+  ) {
+
+    const x =
+      state.data.estudos.find(
+        i => i.id === id
+      );
+
+
+    if (x) {
+      x.done =
+        !x.done;
+    }
+
+
+    saveState();
+
+    render();
+
+    return;
+  }
+
+
+  /* =======================================================
+     EDIÇÃO
+     ======================================================= */
+
+  if (
+    action ===
+    "edit-compromisso"
+  ) {
+
+    editItem(
+      "compromisso",
+      id
+    );
+
+    return;
+  }
+
+
+  if (
+    action === "edit-tarefa"
+  ) {
+
+    editItem(
+      "tarefa",
+      id
+    );
+
+    return;
+  }
+
+
+  /* =======================================================
+     EXCLUSÕES GERAIS
+     ======================================================= */
+
+  const deletes = {
+
+    "delete-compromisso":
+      [
+        "compromissos",
+        "Compromisso removido."
+      ],
+
+    "delete-tarefa":
+      [
+        "tarefas",
+        "Tarefa removida."
+      ],
+
+    "delete-estudo":
+      [
+        "estudos",
+        "Registro removido."
+      ],
+
+    "delete-treino":
+      [
+        "treinos",
+        "Treino removido."
+      ],
+
+    "delete-hidratacao":
+      [
+        "hidratacao",
+        "Registro removido."
+      ],
+
+    "delete-financa":
+      [
+        "financas",
+        "Lançamento removido."
+      ],
+
+    "delete-objetivo":
+      [
+        "objetivos",
+        "Objetivo removido."
+      ],
+
+    "delete-familia":
+      [
+        "familia",
+        "Pessoa removida."
+      ]
+
+  };
+
+
+  if (
+    deletes[action]
+  ) {
+
+    removeItem(
+      ...deletes[action],
+      id
+    );
+
+    return;
+  }
+
+
+  /* =======================================================
+     HIDRATAÇÃO RÁPIDA
+     ======================================================= */
+
+  if (
+    action === "quick-water"
+  ) {
+
+    state.data.hidratacao.push({
+
+      id: uid("h"),
+
+      amount:
+        Number(
+          el.dataset.value
+        ),
+
+      createdAt:
+        new Date()
+          .toISOString()
+
+    });
+
+
+    saveState();
+
+    render();
+
+    toast(
+      `+${el.dataset.value} ml registrados.`
+    );
+
+    return;
+  }
+
+
+  /* =======================================================
+     RESET HIDRATAÇÃO
+     ======================================================= */
+
+  if (
+    action ===
+    "reset-hidratacao"
+  ) {
+
+    if (
+      confirm(
+        "Limpar todos os registros de hidratação?"
+      )
+    ) {
+
+      state.data.hidratacao =
+        [];
+
+      saveState();
+
+      render();
+
+      toast(
+        "Registros limpos."
+      );
+    }
+
+    return;
+  }
+
+
+  /* =======================================================
+     PROGRESSO OBJETIVO
+     ======================================================= */
+
+  if (
+    action ===
+    "progress-objetivo"
+  ) {
+
+    const item =
+      state.data.objetivos.find(
+        x => x.id === id
+      );
+
+
+    if (!item) return;
+
+
+    openModal(
+
+      "Atualizar progresso",
+
+      `${field(
+        "Progresso (%)",
+        "progress",
+        "number",
+        item.progress,
+        'min="0" max="100" required'
+      )}`,
+
+      {
+        submit: "Atualizar"
+      }
+
+    );
+
+
+    modal
+      .querySelector(
+        "#lidire-form"
+      )
+      .onsubmit = e => {
+
+        e.preventDefault();
+
+
+        item.progress =
+          Number(
+            new FormData(e.target)
+              .get("progress")
+          );
+
+
+        saveState();
+
+        closeModal();
+
+        render();
+
+        toast(
+          "Progresso atualizado."
+        );
+
+      };
+
+
+    return;
+  }
+
+
+  /* =======================================================
+     ASSISTENTE
+     ======================================================= */
+
+  if (
+    action ===
+    "assistant-question"
+  ) {
+
+    const q =
+      el.dataset.question;
+
+
+    const pendingTasks =
+      state.data.tarefas
+        .filter(
+          x => !x.done
+        );
+
+
+    const todayCommitments =
+      state.data.compromissos
+        .filter(
+          x =>
+            x.date ===
+            todayISO()
+        );
+
+
+    const shoppingPending =
+      state.data.compras.reduce(
+        (
+          total,
+          lista
+        ) => {
+
+          return (
+            total +
+            (lista.items || [])
+              .filter(
+                item =>
+                  !item.done
+              )
+              .length
+          );
+
+        },
+        0
+      );
+
+
+    let response;
+
+
+    if (
+      q.includes("hoje")
+    ) {
+
+      response =
+        `Hoje você tem ${
+          todayCommitments.length
+        } compromisso(s) na agenda e ${
+          pendingTasks.length
+        } tarefa(s) pendente(s).`;
+
+    }
+
+    else if (
+      q.includes("pendentes")
+    ) {
+
+      response =
+        `Você tem ${
+          pendingTasks
+            .map(
+              x => x.title
+            )
+            .join(", ")
+          ||
+          "nenhuma tarefa pendente"
+        }.`;
+
+    }
+
+    else {
+
+      response =
+        `Sua rotina tem ${
+          pendingTasks.length
+        } tarefa(s) pendente(s), ${
+          state.data.objetivos.length
+        } objetivo(s) e ${
+          shoppingPending
+        } item(ns) pendente(s) nas listas de compras.`;
+
+    }
+
+
+    const box =
+      document.getElementById(
+        "assistant-response"
+      );
+
+
+    if (box) {
+
+      box.innerHTML = `
+
+        <strong>
+          LiDire
+        </strong>
+
+        <p>
+          ${esc(response)}
+        </p>
+
+      `;
+
+    }
+
+
+    return;
+  }
+
+
+  /* =======================================================
+     EDITAR PERFIL
+     ======================================================= */
+
+  if (
+    action ===
+    "edit-profile"
+  ) {
+
+    openModal(
+
+      "Editar perfil",
+
+      `
+        ${field(
+          "Nome",
+          "name",
+          "text",
+          state.user.name,
+          "required"
+        )}
+
+        ${field(
+          "E-mail",
+          "email",
+          "email",
+          state.user.email || ""
+        )}
+
+        ${field(
+          "Idade",
+          "age",
+          "number",
+          state.user.age || ""
+        )}
+
+        ${field(
+          "Telefone",
+          "phone",
+          "tel",
+          state.user.phone || ""
+        )}
+      `,
+
+      {
+        submit:
+          "Salvar perfil"
+      }
+
+    );
+
+
+    modal
+      .querySelector(
+        "#lidire-form"
+      )
+      .onsubmit = e => {
+
+        e.preventDefault();
+
+
+        const f =
+          new FormData(e.target);
+
+
+        state.user = {
+
+          ...state.user,
+
+          ...Object.fromEntries(
+            f.entries()
+          )
+
+        };
+
+
+        saveState();
+
+        closeModal();
+
+        render();
+
+        toast(
+          "Perfil atualizado."
+        );
+
+      };
+
+
+    return;
+  }
+
+
+  /* =======================================================
+     LIMPAR DADOS LOCAIS
+     ======================================================= */
+
+  if (
+    action ===
+    "clear-local"
+  ) {
+
+    if (
+      confirm(
+        "Isso apagará os dados salvos neste dispositivo. Continuar?"
+      )
+    ) {
+
+      state =
+        structuredClone(
+          defaultState
+        );
+
+
+      currentShoppingList =
+        null;
+
+
+      currentPage =
+        "inicio";
+
+
+      saveState();
+
+      render();
+
+      toast(
+        "Dados locais redefinidos."
+      );
+
+    }
+
+    return;
+  }
+
+}
+
+
+/* =========================================================
+   EVENTOS DE CLIQUE — PÁGINAS E AÇÕES
+   ========================================================= */
+
+document.addEventListener(
+  "click",
+  event => {
+
+    const pageEl =
+      event.target.closest(
+        "[data-page]"
+      );
+
+
+    if (pageEl) {
+
+      event.preventDefault();
+
+
+      currentPage =
+        pageEl.dataset.page;
+
+
+      /*
+       * Se sair de uma lista específica
+       * de compras, limpa a lista atual.
+       */
+
+      if (
+        currentPage !==
+        "compras"
+      ) {
+
+        currentShoppingList =
+          null;
+
+      }
+
+
+      render();
+
+      return;
+    }
+
+
+    const actionEl =
+      event.target.closest(
+        "[data-action]"
+      );
+
+
+    if (actionEl) {
+
+      event.preventDefault();
+
+
+      handleAction(
+        actionEl.dataset.action,
+        actionEl
+      );
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   FECHAR MODAL AO CLICAR FORA
+   ========================================================= */
+
+document.addEventListener(
+  "click",
+  event => {
+
+    if (
+      event.target.classList
+        .contains(
+          "modal-backdrop"
+        )
+    ) {
+
+      closeModal();
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   API INTERNA DA LIDIRE
+   ========================================================= */
+
+window.LiDire = {
+
+  state: () =>
+    state,
+
+  save:
+    saveState,
+
+  go: page => {
+
+    currentPage =
+      page;
+
+    currentShoppingList =
+      null;
+
+    render();
+
+  }
+
+};
+
+
+/* =========================================================
+   INICIALIZAÇÃO
+   ========================================================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+
+    /*
+     * Garante que compras
+     * sempre seja um array.
+     */
+
+    if (
+      !Array.isArray(
+        state.data.compras
+      )
+    ) {
+
+      state.data.compras = [];
+
+    }
+
+
+    /*
+     * Garante que cada lista
+     * tenha seu próprio array
+     * de itens.
+     */
+
+    state.data.compras =
+      state.data.compras.map(
+        lista => ({
+
+          ...lista,
+
+          items:
+            Array.isArray(
+              lista.items
+            )
+              ? lista.items
+              : []
+
+        })
+      );
+
+
+    saveState();
+
+    render();
+
+  }
+);
