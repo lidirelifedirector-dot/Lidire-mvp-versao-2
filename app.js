@@ -672,6 +672,37 @@ function addForm(key) {
       state.data.compromissos.push({id:uid("c"),title:f.get("title"),date:f.get("date"),time:f.get("time"),location:f.get("location")});
       saveState(); closeModal(); render(); toast("Compromisso adicionado.");
     };
+    function adicionarListaCompras() {
+  openModal(
+    "Nova lista de compras",
+    `${field("Nome da lista", "name", "text", "", "required")}`,
+    { submit: "Criar lista" }
+  );
+
+  modal.querySelector("#lidire-form").onsubmit = e => {
+    e.preventDefault();
+
+    const f = new FormData(e.target);
+
+    const lista = {
+      id: uid("lista"),
+      name: f.get("name"),
+      items: []
+    };
+
+    if (!state.data.compras) {
+      state.data.compras = [];
+    }
+
+    state.data.compras.push(lista);
+
+    saveState();
+    closeModal();
+    render();
+
+    toast("Lista criada.");
+  };
+}
   } else if (key === "tarefas") {
     openModal("Nova tarefa", `${field("Tarefa","title","text","", "required")}<label class="form-field"><span>Prioridade</span><select name="priority"><option value="">Normal</option><option>Alta</option><option>Média</option><option>Baixa</option></select></label>${field("Prazo","date")}`, {submit:"Adicionar"});
     modal.querySelector("#lidire-form").onsubmit = e => {
