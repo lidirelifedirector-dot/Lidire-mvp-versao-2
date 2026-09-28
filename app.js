@@ -2560,3 +2560,2610 @@ function render() {
     behavior: "smooth"
   });
         }
+
+function openModal(
+  title,
+  body,
+  options = {}
+) {
+  closeModal();
+
+  modal =
+    document.createElement("div");
+
+  modal.className =
+    "modal-backdrop";
+
+  modal.innerHTML = `
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+    >
+
+      <div class="modal-header">
+
+        <div>
+
+          <span class="eyebrow">
+            ${esc(
+              options.eyebrow ||
+                "LIDIRE"
+            )}
+          </span>
+
+          <h2>
+            ${esc(title)}
+          </h2>
+
+        </div>
+
+        <button
+          class="modal-close"
+          data-action="close-modal"
+        >
+          ×
+        </button>
+
+      </div>
+
+      <form
+        id="lidire-form"
+        class="form-grid"
+      >
+
+        ${body}
+
+        <div class="modal-footer">
+
+          <button
+            type="button"
+            class="ghost-button"
+            data-action="close-modal"
+          >
+            Cancelar
+          </button>
+
+          <button
+            class="primary-button"
+            type="submit"
+          >
+            ${esc(
+              options.submit ||
+                "Salvar"
+            )}
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  modal
+    .querySelector(
+      "input, select, textarea"
+    )
+    ?.focus();
+}
+
+function closeModal() {
+  document
+    .querySelector(
+      ".modal-backdrop"
+    )
+    ?.remove();
+
+  modal = null;
+}
+
+/* =========================================================
+   FORMULÁRIOS
+   ========================================================= */
+
+function addForm(key) {
+  if (key === "compromissos") {
+    openModal(
+      "Novo compromisso",
+
+      `
+        ${field(
+          "Título",
+          "title",
+          "text",
+          "",
+          "required"
+        )}
+
+        ${field(
+          "Data",
+          "date",
+          "date",
+          todayISO(),
+          "required"
+        )}
+
+        ${field(
+          "Horário",
+          "time",
+          "time",
+          ""
+        )}
+
+        ${field(
+          "Local",
+          "location"
+        )}
+      `,
+
+      {
+        submit: "Adicionar"
+      }
+    );
+
+    modal.querySelector(
+      "#lidire-form"
+    ).onsubmit = (e) => {
+      e.preventDefault();
+
+      const f =
+        new FormData(e.target);
+
+      state.data.compromissos.push({
+        id: uid("c"),
+        title: f.get("title"),
+        date: f.get("date"),
+        time: f.get("time"),
+        location: f.get("location")
+      });
+
+      saveState();
+      closeModal();
+      render();
+
+      toast(
+        "Compromisso adicionado."
+      );
+    };
+
+    return;
+  }
+
+  if (key === "tarefas") {
+    openModal(
+      "Nova tarefa",
+
+      `
+        ${field(
+          "Tarefa",
+          "title",
+          "text",
+          "",
+          "required"
+        )}
+
+        ${selectField(
+          "Prioridade",
+          "priority",
+          [
+            {
+              value: "",
+              label: "Normal"
+            },
+            {
+              value: "Alta",
+              label: "Alta"
+            },
+            {
+              value: "Média",
+              label: "Média"
+            },
+            {
+              value: "Baixa",
+              label: "Baixa"
+            }
+          ]
+        )}
+
+        ${field(
+          "Prazo",
+          "date",
+          "date"
+        )}
+      `,
+
+      {
+        submit: "Adicionar"
+      }
+    );
+
+    modal.querySelector(
+      "#lidire-form"
+    ).onsubmit = (e) => {
+      e.preventDefault();
+
+      const f =
+        new FormData(e.target);
+
+      state.data.tarefas.push({
+        id: uid("t"),
+        title: f.get("title"),
+        priority:
+          f.get("priority"),
+        date: f.get("date"),
+        done: false
+      });
+
+      saveState();
+      closeModal();
+      render();
+
+      toast(
+        "Tarefa adicionada."
+      );
+    };
+
+    return;
+  }
+
+  if (key === "compras") {
+    adicionarListaCompras();
+    return;
+  }
+
+  if (key === "estudos") {
+    openModal(
+      "Nova sessão de estudo",
+
+      `
+        ${field(
+          "Matéria",
+          "subject",
+          "text",
+          "",
+          "required"
+        )}
+
+        ${field(
+          "Tema",
+          "topic"
+        )}
+
+        ${field(
+          "Data",
+          "date",
+          "date",
+          todayISO()
+        )}
+
+        ${field(
+          "Horário",
+          "time",
+          "time"
+        )}
+
+        ${field(
+          "Duração (min)",
+          "duration",
+          "number"
+        )}
+      `,
+
+      {
+        submit: "Registrar"
+      }
+    );
+
+    modal.querySelector(
+      "#lidire-form"
+    ).onsubmit = (e) => {
+      e.preventDefault();
+
+      const f =
+        new FormData(e.target);
+
+      state.data.estudos.push({
+        id: uid("e"),
+        subject:
+          f.get("subject"),
+        topic:
+          f.get("topic"),
+        date:
+          f.get("date"),
+        time:
+          f.get("time"),
+        duration:
+          f.get("duration"),
+        done: false
+      });
+
+      saveState();
+      closeModal();
+      render();
+
+      toast(
+        "Estudo registrado."
+      );
+    };
+
+    return;
+  }
+
+  if (key === "treinos") {
+    openModal(
+      "Novo treino",
+
+      `
+        ${field(
+          "Nome",
+          "name",
+          "text",
+          "",
+          "required"
+        )}
+
+        ${field(
+          "Tipo",
+          "type"
+        )}
+
+        ${field(
+          "Data",
+          "date",
+          "date",
+          todayISO()
+        )}
+
+        ${field(
+          "Horário",
+          "time",
+          "time"
+        )}
+
+        ${field(
+          "Duração (min)",
+          "duration",
+          "number"
+        )}
+      `,
+
+      {
+        submit: "Registrar"
+      }
+    );
+
+    modal.querySelector(
+      "#lidire-form"
+    ).onsubmit = (e) => {
+      e.preventDefault();
+
+      const f =
+        new FormData(e.target);
+
+      state.data.treinos.push({
+        id: uid("tr"),
+        name: f.get("name"),
+        type: f.get("type"),
+        date: f.get("date"),
+        time: f.get("time"),
+        duration:
+          f.get("duration")
+      });
+
+      saveState();
+      closeModal();
+      render();
+
+      toast(
+        "Treino registrado."
+      );
+    };
+
+    return;
+  }
+
+  if (key === "hidratacao") {
+    openModal(
+      "Registrar água",
+
+      `
+        ${field(
+          "Quantidade (ml)",
+          "amount",
+          "number",
+          "300",
+          "required min='1'"
+        )}
+      `,
+
+      {
+        submit: "Registrar"
+      }
+    );
+
+    modal.querySelector(
+      "#lidire-form"
+    ).onsubmit = (e) => {
+      e.preventDefault();
+
+      const f =
+        new FormData(e.target);
+
+      state.data.hidratacao.push({
+        id: uid("h"),
+        amount:
+          Number(
+            f.get("amount")
+          ),
+        createdAt:
+          new Date().toISOString()
+      });
+
+      saveState();
+      closeModal();
+      render();
+
+      toast(
+        "Hidratação registrada."
+      );
+    };
+
+    return;
+  }
+
+  if (key === "alimentacao") {
+    addMealForm();
+    return;
+  }
+
+  if (key === "financas") {
+    addFinanceForm();
+    return;
+  }
+
+  if (key === "objetivos") {
+    addGoalForm();
+    return;
+  }
+
+  if (key === "familia") {
+    addFamilyForm();
+    return;
+  }
+}
+
+/* =========================================================
+   COMPRAS
+   ========================================================= */
+
+function adicionarListaCompras() {
+  openModal(
+    "Nova lista de compras",
+
+    field(
+      "Nome da lista",
+      "name",
+      "text",
+      "",
+      "required"
+    ),
+
+    {
+      submit: "Criar lista"
+    }
+  );
+
+  modal.querySelector(
+    "#lidire-form"
+  ).onsubmit = (e) => {
+    e.preventDefault();
+
+    const f =
+      new FormData(e.target);
+
+    if (!state.data.compras) {
+      state.data.compras = [];
+    }
+
+    state.data.compras.push({
+      id: uid("lista"),
+      name: f.get("name"),
+      items: []
+    });
+
+    saveState();
+    closeModal();
+    render();
+
+    toast(
+      "Lista criada."
+    );
+  };
+}
+
+function addItemCompra(listId) {
+  const lista =
+    state.data.compras.find(
+      (x) => x.id === listId
+    );
+
+  if (!lista) return;
+
+  openModal(
+    "Adicionar item",
+
+    `
+      ${field(
+        "Item",
+        "name",
+        "text",
+        "",
+        "required"
+      )}
+
+      ${field(
+        "Quantidade",
+        "quantity"
+      )}
+
+      ${field(
+        "Categoria",
+        "category"
+      )}
+    `,
+
+    {
+      submit: "Adicionar"
+    }
+  );
+
+  modal.querySelector(
+    "#lidire-form"
+  ).onsubmit = (e) => {
+    e.preventDefault();
+
+    const f =
+      new FormData(e.target);
+
+    lista.items =
+      lista.items || [];
+
+    lista.items.push({
+      id: uid("item"),
+      name: f.get("name"),
+      quantity:
+        f.get("quantity"),
+      category:
+        f.get("category"),
+      done: false
+    });
+
+    saveState();
+    closeModal();
+    render();
+
+    toast(
+      "Item adicionado."
+    );
+  };
+}
+
+/* =========================================================
+   ALIMENTAÇÃO
+   ========================================================= */
+
+function addMealForm(item = null) {
+  const editing =
+    Boolean(item);
+
+  openModal(
+    editing
+      ? "Editar refeição"
+      : "Nova refeição",
+
+    `
+      ${selectField(
+        "Refeição",
+        "mealType",
+        [
+          {
+            value: "Café da manhã",
+            label: "Café da manhã"
+          },
+          {
+            value: "Lanche da manhã",
+            label: "Lanche da manhã"
+          },
+          {
+            value: "Almoço",
+            label: "Almoço"
+          },
+          {
+            value: "Lanche da tarde",
+            label: "Lanche da tarde"
+          },
+          {
+            value: "Jantar",
+            label: "Jantar"
+          },
+          {
+            value: "Ceia",
+            label: "Ceia"
+          },
+          {
+            value: "Outra",
+            label: "Outra"
+          }
+        ],
+        item?.mealType ||
+          "Café da manhã"
+      )}
+
+      ${field(
+        "Data",
+        "date",
+        "date",
+        item?.date ||
+          todayISO(),
+        "required"
+      )}
+
+      ${field(
+        "Horário",
+        "time",
+        "time",
+        item?.time || "",
+        "required"
+      )}
+
+      <label class="form-field">
+
+        <span>
+          Alimentos
+        </span>
+
+        <textarea
+          name="foods"
+          rows="4"
+          placeholder="Ex.: arroz, feijão, frango, salada"
+          required
+        >${esc(
+          item?.foods || ""
+        )}</textarea>
+
+      </label>
+
+      ${field(
+        "Calorias (kcal)",
+        "calories",
+        "number",
+        item?.calories || "",
+        "min='0' step='1' required"
+      )}
+    `,
+
+    {
+      submit: editing
+        ? "Salvar"
+        : "Adicionar"
+    }
+  );
+
+  modal.querySelector(
+    "#lidire-form"
+  ).onsubmit = (e) => {
+    e.preventDefault();
+
+    const f =
+      new FormData(e.target);
+
+    const data = {
+      mealType:
+        f.get("mealType"),
+      date:
+        f.get("date"),
+      time:
+        f.get("time"),
+      foods:
+        f.get("foods"),
+      calories:
+        Number(
+          f.get("calories") || 0
+        )
+    };
+
+    if (editing) {
+      Object.assign(
+        item,
+        data
+      );
+
+      toast(
+        "Refeição atualizada."
+      );
+    } else {
+      state.data.alimentacao.push({
+        id: uid("meal"),
+        ...data
+      });
+
+      toast(
+        "Refeição adicionada."
+      );
+    }
+
+    saveState();
+    closeModal();
+    render();
+  };
+}
+
+function configurarAlimentacao() {
+  const current =
+    state.data.alimentacaoConfig
+      .dailyCalories;
+
+  openModal(
+    "Meta diária de calorias",
+
+    `
+      ${field(
+        "Meta diária (kcal)",
+        "dailyCalories",
+        "number",
+        current,
+        "min='1' required"
+      )}
+
+      <p class="muted">
+        A LiDire descontará automaticamente
+        as calorias das refeições registradas
+        no dia.
+      </p>
+    `,
+
+    {
+      submit: "Salvar meta"
+    }
+  );
+
+  modal.querySelector(
+    "#lidire-form"
+  ).onsubmit = (e) => {
+    e.preventDefault();
+
+    const f =
+      new FormData(e.target);
+
+    state.data.alimentacaoConfig
+      .dailyCalories =
+      Number(
+        f.get("dailyCalories")
+      );
+
+    saveState();
+    closeModal();
+    render();
+
+    toast(
+      "Meta de calorias atualizada."
+    );
+  };
+}
+
+/* =========================================================
+   HIDRATAÇÃO — CONFIGURAÇÃO
+   ========================================================= */
+
+function configurarHidratacao() {
+  const config =
+    state.data.hidratacaoConfig;
+
+  openModal(
+    "Configurar hidratação",
+
+    `
+      ${field(
+        "Quantidade por período (ml)",
+        "amountPerPeriod",
+        "number",
+        config.amountPerPeriod,
+        "min='1' required"
+      )}
+
+      ${field(
+        "Intervalo entre períodos (minutos)",
+        "intervalMinutes",
+        "number",
+        config.intervalMinutes,
+        "min='1' required"
+      )}
+
+      ${field(
+        "Horário inicial",
+        "startTime",
+        "time",
+        config.startTime,
+        "required"
+      )}
+
+      ${field(
+        "Horário final",
+        "endTime",
+        "time",
+        config.endTime,
+        "required"
+      )}
+
+      <p class="muted">
+        Exemplo: 300 ml a cada 120 minutos,
+        das 08:00 às 20:00.
+      </p>
+    `,
+
+    {
+      submit: "Salvar configuração"
+    }
+  );
+
+  modal.querySelector(
+    "#lidire-form"
+  ).onsubmit = (e) => {
+    e.preventDefault();
+
+    const f =
+      new FormData(e.target);
+
+    state.data.hidratacaoConfig = {
+      amountPerPeriod:
+        Number(
+          f.get(
+            "amountPerPeriod"
+          )
+        ),
+
+      intervalMinutes:
+        Number(
+          f.get(
+            "intervalMinutes"
+          )
+        ),
+
+      startTime:
+        f.get("startTime"),
+
+      endTime:
+        f.get("endTime")
+    };
+
+    saveState();
+    closeModal();
+    render();
+
+    toast(
+      "Meta de hidratação atualizada."
+    );
+  };
+}
+
+/* =========================================================
+   FINANÇAS
+   ========================================================= */
+
+function addFinanceForm(item = null) {
+  const editing =
+    Boolean(item);
+
+  openModal(
+    editing
+      ? "Editar lançamento"
+      : "Novo lançamento",
+
+    `
+      ${selectField(
+        "Tipo",
+        "type",
+        [
+          {
+            value: "expense",
+            label: "Saída"
+          },
+          {
+            value: "income",
+            label: "Entrada"
+          }
+        ],
+        item?.type ||
+          "expense"
+      )}
+
+      ${field(
+        "Descrição",
+        "title",
+        "text",
+        item?.title || "",
+        "required"
+      )}
+
+      ${field(
+        "Valor",
+        "value",
+        "number",
+        item?.value || "",
+        "step='0.01' min='0' required"
+      )}
+
+      ${field(
+        "Categoria",
+        "category",
+        "text",
+        item?.category || ""
+      )}
+
+      ${field(
+        "Data",
+        "date",
+        "date",
+        item?.date ||
+          todayISO()
+      )}
+    `,
+
+    {
+      submit: editing
+        ? "Salvar"
+        : "Salvar"
+    }
+  );
+
+  modal.querySelector(
+    "#lidire-form"
+  ).onsubmit = (e) => {
+    e.preventDefault();
+
+    const f =
+      new FormData(e.target);
+
+    const data = {
+      type:
+        f.get("type"),
+      title:
+        f.get("title"),
+      value:
+        Number(
+          f.get("value") || 0
+        ),
+      category:
+        f.get("category"),
+      date:
+        f.get("date")
+    };
+
+    if (editing) {
+      Object.assign(
+        item,
+        data
+      );
+
+      toast(
+        "Lançamento atualizado."
+      );
+    } else {
+      state.data.financas.push({
+        id: uid("f"),
+        ...data
+      });
+
+      toast(
+        "Lançamento salvo."
+      );
+    }
+
+    saveState();
+    closeModal();
+    render();
+  };
+}
+
+/* =========================================================
+   OBJETIVOS
+   ========================================================= */
+
+function addGoalForm(item = null) {
+  const editing =
+    Boolean(item);
+
+  openModal(
+    editing
+      ? "Editar objetivo"
+      : "Novo objetivo",
+
+    `
+      ${field(
+        "Objetivo",
+        "title",
+        "text",
+        item?.title || "",
+        "required"
+      )}
+
+      ${field(
+        "Prazo",
+        "deadline",
+        "date",
+        item?.deadline || ""
+      )}
+
+      ${field(
+        "Progresso (%)",
+        "progress",
+        "number",
+        item?.progress ?? 0,
+        "min='0' max='100'"
+      )}
+    `,
+
+    {
+      submit: editing
+        ? "Salvar"
+        : "Criar objetivo"
+    }
+  );
+
+  modal.querySelector(
+    "#lidire-form"
+  ).onsubmit = (e) => {
+    e.preventDefault();
+
+    const f =
+      new FormData(e.target);
+
+    const data = {
+      title:
+        f.get("title"),
+      deadline:
+        f.get("deadline"),
+      progress:
+        Number(
+          f.get("progress") || 0
+        )
+    };
+
+    if (editing) {
+      Object.assign(
+        item,
+        data
+      );
+
+      toast(
+        "Objetivo atualizado."
+      );
+    } else {
+      state.data.objetivos.push({
+        id: uid("o"),
+        ...data
+      });
+
+      toast(
+        "Objetivo criado."
+      );
+    }
+
+    saveState();
+    closeModal();
+    render();
+  };
+}
+
+/* =========================================================
+   FAMÍLIA
+   ========================================================= */
+
+function addFamilyForm(item = null) {
+  const editing =
+    Boolean(item);
+
+  openModal(
+    editing
+      ? "Editar pessoa"
+      : "Adicionar pessoa",
+
+    `
+      ${field(
+        "Nome",
+        "name",
+        "text",
+        item?.name || "",
+        "required"
+      )}
+
+      ${field(
+        "Relação",
+        "relation",
+        "text",
+        item?.relation || ""
+      )}
+
+      ${field(
+        "E-mail",
+        "email",
+        "email",
+        item?.email || ""
+      )}
+    `,
+
+    {
+      submit: editing
+        ? "Salvar"
+        : "Adicionar"
+    }
+  );
+
+  modal.querySelector(
+    "#lidire-form"
+  ).onsubmit = (e) => {
+    e.preventDefault();
+
+    const f =
+      new FormData(e.target);
+
+    const data = {
+      name:
+        f.get("name"),
+      relation:
+        f.get("relation"),
+      email:
+        f.get("email")
+    };
+
+    if (editing) {
+      Object.assign(
+        item,
+        data
+      );
+
+      toast(
+        "Pessoa atualizada."
+      );
+    } else {
+      state.data.familia.push({
+        id: uid("m"),
+        ...data
+      });
+
+      toast(
+        "Pessoa adicionada."
+      );
+    }
+
+    saveState();
+    closeModal();
+    render();
+  };
+}
+
+/* =========================================================
+   PERFIL — FOTO
+   ========================================================= */
+
+function addProfilePhoto() {
+  openModal(
+    state.user.photo
+      ? "Alterar foto de perfil"
+      : "Adicionar foto de perfil",
+
+    `
+      <label class="form-field">
+
+        <span>
+          Foto de perfil
+        </span>
+
+        <input
+          id="profile-photo-input"
+          name="photo"
+          type="file"
+          accept="image/*"
+          required
+        >
+
+      </label>
+
+      <div
+        id="profile-photo-preview"
+        class="profile-photo-preview"
+      ></div>
+    `,
+
+    {
+      submit: state.user.photo
+        ? "Alterar foto"
+        : "Adicionar foto"
+    }
+  );
+
+  const input =
+    modal.querySelector(
+      "#profile-photo-input"
+    );
+
+  const preview =
+    modal.querySelector(
+      "#profile-photo-preview"
+    );
+
+  input.addEventListener(
+    "change",
+    () => {
+      const file =
+        input.files?.[0];
+
+      if (!file) return;
+
+      const reader =
+        new FileReader();
+
+      reader.onload = () => {
+        preview.innerHTML = `
+          <img
+            src="${reader.result}"
+            alt="Prévia da foto"
+          >
+        `;
+      };
+
+      reader.readAsDataURL(file);
+    }
+  );
+
+  modal.querySelector(
+    "#lidire-form"
+  ).onsubmit = (e) => {
+    e.preventDefault();
+
+    const file =
+      input.files?.[0];
+
+    if (!file) {
+      toast(
+        "Selecione uma foto.",
+        "error"
+      );
+
+      return;
+    }
+
+    const reader =
+      new FileReader();
+
+    reader.onload = () => {
+      state.user.photo =
+        reader.result;
+
+      saveState();
+      closeModal();
+      render();
+
+      toast(
+        "Foto de perfil atualizada."
+      );
+    };
+
+    reader.readAsDataURL(file);
+  };
+}
+
+function deleteProfilePhoto() {
+  if (
+    !state.user.photo
+  ) {
+    toast(
+      "Não há foto de perfil.",
+      "error"
+    );
+
+    return;
+  }
+
+  if (
+    confirm(
+      "Excluir sua foto de perfil?"
+    )
+  ) {
+    state.user.photo = "";
+
+    saveState();
+    render();
+
+    toast(
+      "Foto de perfil excluída."
+    );
+  }
+}
+
+/* =========================================================
+   EDIÇÃO
+   ========================================================= */
+
+function editItem(
+  type,
+  id
+) {
+  const map = {
+    compromisso:
+      "compromissos",
+    tarefa:
+      "tarefas"
+  };
+
+  const key =
+    map[type];
+
+  const item =
+    state.data[key]?.find(
+      (x) => x.id === id
+    );
+
+  if (!item) return;
+
+  if (
+    type === "compromisso"
+  ) {
+    openModal(
+      "Editar compromisso",
+
+      `
+        ${field(
+          "Título",
+          "title",
+          "text",
+          item.title,
+          "required"
+        )}
+
+        ${field(
+          "Data",
+          "date",
+          "date",
+          item.date,
+          "required"
+        )}
+
+        ${field(
+          "Horário",
+          "time",
+          "time",
+          item.time || ""
+        )}
+
+        ${field(
+          "Local",
+          "location",
+          "text",
+          item.location || ""
+        )}
+      `,
+
+      {
+        submit: "Salvar"
+      }
+    );
+  }
+
+  if (
+    type === "tarefa"
+  ) {
+    openModal(
+      "Editar tarefa",
+
+      `
+        ${field(
+          "Tarefa",
+          "title",
+          "text",
+          item.title,
+          "required"
+        )}
+
+        ${selectField(
+          "Prioridade",
+          "priority",
+          [
+            {
+              value: "",
+              label: "Normal"
+            },
+            {
+              value: "Alta",
+              label: "Alta"
+            },
+            {
+              value: "Média",
+              label: "Média"
+            },
+            {
+              value: "Baixa",
+              label: "Baixa"
+            }
+          ],
+          item.priority || ""
+        )}
+
+        ${field(
+          "Prazo",
+          "date",
+          "date",
+          item.date || ""
+        )}
+      `,
+
+      {
+        submit: "Salvar"
+      }
+    );
+  }
+
+  modal.querySelector(
+    "#lidire-form"
+  ).onsubmit = (e) => {
+    e.preventDefault();
+
+    const f =
+      new FormData(e.target);
+
+    Object.assign(
+      item,
+      Object.fromEntries(
+        f.entries()
+      )
+    );
+
+    saveState();
+    closeModal();
+    render();
+
+    toast(
+      "Alterações salvas."
+    );
+  };
+}
+
+/* =========================================================
+   REMOÇÃO
+   ========================================================= */
+
+function removeItem(
+  key,
+  id,
+  message = "Item removido."
+) {
+  if (!state.data[key]) {
+    return;
+  }
+
+  state.data[key] =
+    state.data[key].filter(
+      (x) => x.id !== id
+    );
+
+  saveState();
+  render();
+
+  toast(message);
+}
+
+/* =========================================================
+   AÇÕES
+   ========================================================= */
+
+function handleAction(
+  action,
+  el
+) {
+  if (
+    action === "quick-add"
+  ) {
+    openModal(
+      "O que você quer adicionar?",
+
+      `
+        <div class="quick-actions">
+
+          ${[
+            [
+              "compromissos",
+              "▣",
+              "Compromisso"
+            ],
+            [
+              "tarefas",
+              "✓",
+              "Tarefa"
+            ],
+            [
+              "compras",
+              "🛒",
+              "Compra"
+            ],
+            [
+              "estudos",
+              "▤",
+              "Estudo"
+            ],
+            [
+              "treinos",
+              "♢",
+              "Treino"
+            ],
+            [
+              "hidratacao",
+              "◉",
+              "Água"
+            ],
+            [
+              "alimentacao",
+              "🍽️",
+              "Refeição"
+            ],
+            [
+              "financas",
+              "R$",
+              "Finança"
+            ],
+            [
+              "objetivos",
+              "◎",
+              "Objetivo"
+            ],
+            [
+              "familia",
+              "♧",
+              "Pessoa"
+            ]
+          ]
+            .map(
+              (x) => `
+                <button
+                  type="button"
+                  class="quick-option"
+                  data-action="quick-option"
+                  data-key="${x[0]}"
+                >
+                  <span>${x[1]}</span>
+                  ${x[2]}
+                </button>
+              `
+            )
+            .join("")}
+
+        </div>
+      `,
+
+      {
+        submit: "Fechar"
+      }
+    );
+
+    modal.querySelector(
+      ".modal-footer"
+    ).style.display =
+      "none";
+
+    return;
+  }
+
+  if (
+    action === "quick-option"
+  ) {
+    const key =
+      el.dataset.key;
+
+    closeModal();
+    addForm(key);
+
+    return;
+  }
+
+  if (
+    action === "close-modal"
+  ) {
+    closeModal();
+    return;
+  }
+
+  if (
+    action.startsWith("add-")
+  ) {
+    addForm(
+      action.slice(4)
+    );
+
+    return;
+  }
+
+  const id =
+    el.dataset.id;
+
+  if (
+    action === "toggle-tarefa"
+  ) {
+    const item =
+      state.data.tarefas.find(
+        (x) => x.id === id
+      );
+
+    if (item) {
+      item.done =
+        !item.done;
+    }
+
+    saveState();
+    render();
+
+    return;
+  }
+
+  if (
+    action ===
+    "toggle-estudo"
+  ) {
+    const item =
+      state.data.estudos.find(
+        (x) => x.id === id
+      );
+
+    if (item) {
+      item.done =
+        !item.done;
+    }
+
+    saveState();
+    render();
+
+    return;
+  }
+
+  if (
+    action ===
+    "toggle-item-compra"
+  ) {
+    const lista =
+      state.data.compras.find(
+        (x) =>
+          x.id ===
+          el.dataset.listId
+      );
+
+    const item =
+      lista?.items?.find(
+        (x) =>
+          x.id === id
+      );
+
+    if (item) {
+      item.done =
+        !item.done;
+    }
+
+    saveState();
+    render();
+
+    return;
+  }
+
+  if (
+    action ===
+    "open-lista-compras"
+  ) {
+    currentShoppingList =
+      id;
+
+    currentPage =
+      "compras";
+
+    render();
+
+    return;
+  }
+
+  if (
+    action ===
+    "back-compras"
+  ) {
+    currentShoppingList =
+      null;
+
+    currentPage =
+      "compras";
+
+    render();
+
+    return;
+  }
+
+  if (
+    action ===
+    "add-item-compra"
+  ) {
+    addItemCompra(id);
+    return;
+  }
+
+  if (
+    action ===
+    "edit-item-compra"
+  ) {
+    editItemCompra(
+      el.dataset.listId,
+      id
+    );
+
+    return;
+  }
+
+  if (
+    action ===
+    "delete-item-compra"
+  ) {
+    const lista =
+      state.data.compras.find(
+        (x) =>
+          x.id ===
+          el.dataset.listId
+      );
+
+    if (!lista) return;
+
+    lista.items =
+      (lista.items || [])
+        .filter(
+          (x) => x.id !== id
+        );
+
+    saveState();
+    render();
+
+    toast(
+      "Item removido."
+    );
+
+    return;
+  }
+
+  if (
+    action ===
+    "delete-lista-compras"
+  ) {
+    if (
+      confirm(
+        "Excluir esta lista de compras?"
+      )
+    ) {
+      state.data.compras =
+        state.data.compras.filter(
+          (x) => x.id !== id
+        );
+
+      currentShoppingList =
+        null;
+
+      saveState();
+      render();
+
+      toast(
+        "Lista excluída."
+      );
+    }
+
+    return;
+  }
+
+  if (
+    action ===
+    "edit-compromisso"
+  ) {
+    editItem(
+      "compromisso",
+      id
+    );
+
+    return;
+  }
+
+  if (
+    action ===
+    "edit-tarefa"
+  ) {
+    editItem(
+      "tarefa",
+      id
+    );
+
+    return;
+  }
+
+  if (
+    action ===
+    "add-profile-photo"
+  ) {
+    addProfilePhoto();
+    return;
+  }
+
+  if (
+    action ===
+    "delete-profile-photo"
+  ) {
+    deleteProfilePhoto();
+    return;
+  }
+
+  if (
+    action ===
+    "config-alimentacao"
+  ) {
+    configurarAlimentacao();
+    return;
+  }
+
+  if (
+    action ===
+    "edit-alimentacao"
+  ) {
+    const item =
+      state.data.alimentacao.find(
+        (x) => x.id === id
+      );
+
+    if (item) {
+      addMealForm(item);
+    }
+
+    return;
+  }
+
+  if (
+    action ===
+    "delete-alimentacao"
+  ) {
+    removeItem(
+      "alimentacao",
+      id,
+      "Refeição removida."
+    );
+
+    return;
+  }
+
+  if (
+    action ===
+    "config-hidratacao"
+  ) {
+    configurarHidratacao();
+    return;
+  }
+
+  if (
+    action ===
+    "quick-water"
+  ) {
+    state.data.hidratacao.push({
+      id: uid("h"),
+      amount:
+        Number(
+          el.dataset.value
+        ),
+      createdAt:
+        new Date().toISOString()
+    });
+
+    saveState();
+    render();
+
+    toast(
+      `+${el.dataset.value} ml registrados.`
+    );
+
+    return;
+  }
+
+  if (
+    action ===
+    "reset-hidratacao"
+  ) {
+    if (
+      confirm(
+        "Limpar todos os registros de hidratação?"
+      )
+    ) {
+      state.data.hidratacao =
+        state.data.hidratacao.filter(
+          (x) =>
+            String(
+              x.createdAt || ""
+            ).slice(0, 10) !==
+            todayISO()
+        );
+
+      saveState();
+      render();
+
+      toast(
+        "Registros de hoje limpos."
+      );
+    }
+
+    return;
+  }
+
+  if (
+    action ===
+    "edit-estudo"
+  ) {
+    const item =
+      state.data.estudos.find(
+        (x) => x.id === id
+      );
+
+    if (!item) return;
+
+    openModal(
+      "Editar sessão de estudo",
+
+      `
+        ${field(
+          "Matéria",
+          "subject",
+          "text",
+          item.subject,
+          "required"
+        )}
+
+        ${field(
+          "Tema",
+          "topic",
+          "text",
+          item.topic || ""
+        )}
+
+        ${field(
+          "Data",
+          "date",
+          "date",
+          item.date || ""
+        )}
+
+        ${field(
+          "Horário",
+          "time",
+          "time",
+          item.time || ""
+        )}
+
+        ${field(
+          "Duração (min)",
+          "duration",
+          "number",
+          item.duration || ""
+        )}
+      `,
+
+      {
+        submit: "Salvar"
+      }
+    );
+
+    modal.querySelector(
+      "#lidire-form"
+    ).onsubmit = (e) => {
+      e.preventDefault();
+
+      const f =
+        new FormData(e.target);
+
+      Object.assign(
+        item,
+        Object.fromEntries(
+          f.entries()
+        )
+      );
+
+      saveState();
+      closeModal();
+      render();
+
+      toast(
+        "Estudo atualizado."
+      );
+    };
+
+    return;
+  }
+
+  if (
+    action ===
+    "edit-treino"
+  ) {
+    const item =
+      state.data.treinos.find(
+        (x) => x.id === id
+      );
+
+    if (!item) return;
+
+    openModal(
+      "Editar treino",
+
+      `
+        ${field(
+          "Nome",
+          "name",
+          "text",
+          item.name,
+          "required"
+        )}
+
+        ${field(
+          "Tipo",
+          "type",
+          "text",
+          item.type || ""
+        )}
+
+        ${field(
+          "Data",
+          "date",
+          "date",
+          item.date || ""
+        )}
+
+        ${field(
+          "Horário",
+          "time",
+          "time",
+          item.time || ""
+        )}
+
+        ${field(
+          "Duração (min)",
+          "duration",
+          "number",
+          item.duration || ""
+        )}
+      `,
+
+      {
+        submit: "Salvar"
+      }
+    );
+
+    modal.querySelector(
+      "#lidire-form"
+    ).onsubmit = (e) => {
+      e.preventDefault();
+
+      const f =
+        new FormData(e.target);
+
+      Object.assign(
+        item,
+        Object.fromEntries(
+          f.entries()
+        )
+      );
+
+      saveState();
+      closeModal();
+      render();
+
+      toast(
+        "Treino atualizado."
+      );
+    };
+
+    return;
+  }
+
+  if (
+    action ===
+    "edit-financa"
+  ) {
+    const item =
+      state.data.financas.find(
+        (x) => x.id === id
+      );
+
+    if (item) {
+      addFinanceForm(item);
+    }
+
+    return;
+  }
+
+  if (
+    action ===
+    "edit-objetivo"
+  ) {
+    const item =
+      state.data.objetivos.find(
+        (x) => x.id === id
+      );
+
+    if (item) {
+      addGoalForm(item);
+    }
+
+    return;
+  }
+
+  if (
+    action ===
+    "edit-familia"
+  ) {
+    const item =
+      state.data.familia.find(
+        (x) => x.id === id
+      );
+
+    if (item) {
+      addFamilyForm(item);
+    }
+
+    return;
+  }
+
+  if (
+    action ===
+    "progress-objetivo"
+  ) {
+    const item =
+      state.data.objetivos.find(
+        (x) => x.id === id
+      );
+
+    if (!item) return;
+
+    openModal(
+      "Atualizar progresso",
+
+      field(
+        "Progresso (%)",
+        "progress",
+        "number",
+        item.progress,
+        "min='0' max='100' required"
+      ),
+
+      {
+        submit: "Atualizar"
+      }
+    );
+
+    modal.querySelector(
+      "#lidire-form"
+    ).onsubmit = (e) => {
+      e.preventDefault();
+
+      item.progress =
+        Number(
+          new FormData(
+            e.target
+          ).get("progress")
+        );
+
+      saveState();
+      closeModal();
+      render();
+
+      toast(
+        "Progresso atualizado."
+      );
+    };
+
+    return;
+  }
+
+  if (
+    action ===
+    "assistant-question"
+  ) {
+    const q =
+      el.dataset.question;
+
+    let response = "";
+
+    if (
+      q.includes("hoje")
+    ) {
+      response =
+        `Hoje você tem ${
+          state.data.compromissos.filter(
+            (x) =>
+              x.date ===
+              todayISO()
+          ).length
+        } compromisso(s) na agenda e ${
+          state.data.tarefas.filter(
+            (x) => !x.done
+          ).length
+        } tarefa(s) pendente(s).`;
+    } else if (
+      q.includes("pendentes")
+    ) {
+      response =
+        `Você tem ${
+          state.data.tarefas
+            .filter(
+              (x) => !x.done
+            )
+            .map(
+              (x) => x.title
+            )
+            .join(", ") ||
+          "nenhuma tarefa pendente"
+        }.`;
+    } else {
+      response =
+        `Sua rotina tem ${
+          state.data.tarefas.filter(
+            (x) => !x.done
+          ).length
+        } tarefa(s) pendente(s), ${
+          state.data.objetivos
+            .length
+        } objetivo(s) e ${
+          state.data.compras.reduce(
+            (total, lista) =>
+              total +
+              (lista.items || [])
+                .filter(
+                  (x) => !x.done
+                ).length,
+            0
+          )
+        } item(ns) pendente(s) nas compras.`;
+    }
+
+    const box =
+      document.getElementById(
+        "assistant-response"
+      );
+
+    if (box) {
+      box.innerHTML = `
+        <strong>
+          LiDire
+        </strong>
+
+        <p>
+          ${esc(response)}
+        </p>
+      `;
+    }
+
+    return;
+  }
+
+  if (
+    action ===
+    "edit-profile"
+  ) {
+    openModal(
+      "Editar perfil",
+
+      `
+        ${field(
+          "Nome",
+          "name",
+          "text",
+          state.user.name,
+          "required"
+        )}
+
+        ${field(
+          "E-mail",
+          "email",
+          "email",
+          state.user.email || ""
+        )}
+
+        ${field(
+          "Idade",
+          "age",
+          "number",
+          state.user.age || ""
+        )}
+
+        ${field(
+          "Telefone",
+          "phone",
+          "tel",
+          state.user.phone || ""
+        )}
+      `,
+
+      {
+        submit: "Salvar perfil"
+      }
+    );
+
+    modal.querySelector(
+      "#lidire-form"
+    ).onsubmit = (e) => {
+      e.preventDefault();
+
+      const f =
+        new FormData(e.target);
+
+      state.user = {
+        ...state.user,
+        ...Object.fromEntries(
+          f.entries()
+        )
+      };
+
+      saveState();
+      closeModal();
+      render();
+
+      toast(
+        "Perfil atualizado."
+      );
+    };
+
+    return;
+  }
+
+  if (
+    action ===
+    "clear-local"
+  ) {
+    if (
+      confirm(
+        "Isso apagará os dados salvos neste dispositivo. Continuar?"
+      )
+    ) {
+      state =
+        cloneDefaultState();
+
+      saveState();
+      render();
+
+      toast(
+        "Dados locais redefinidos."
+      );
+    }
+
+    return;
+  }
+
+  const deletes = {
+    "delete-compromisso": [
+      "compromissos",
+      "Compromisso removido."
+    ],
+
+    "delete-tarefa": [
+      "tarefas",
+      "Tarefa removida."
+    ],
+
+    "delete-estudo": [
+      "estudos",
+      "Registro removido."
+    ],
+
+    "delete-treino": [
+      "treinos",
+      "Treino removido."
+    ],
+
+    "delete-hidratacao": [
+      "hidratacao",
+      "Registro removido."
+    ],
+
+    "delete-financa": [
+      "financas",
+      "Lançamento removido."
+    ],
+
+    "delete-objetivo": [
+      "objetivos",
+      "Objetivo removido."
+    ],
+
+    "delete-familia": [
+      "familia",
+      "Pessoa removida."
+    ]
+  };
+
+  if (deletes[action]) {
+    removeItem(
+      ...deletes[action],
+      id
+    );
+
+    return;
+  }
+}
+
+/* =========================================================
+   EDIÇÃO DE ITEM DE COMPRAS
+   ========================================================= */
+
+function editItemCompra(
+  listId,
+  itemId
+) {
+  const lista =
+    state.data.compras.find(
+      (x) => x.id === listId
+    );
+
+  const item =
+    lista?.items?.find(
+      (x) => x.id === itemId
+    );
+
+  if (!lista || !item) {
+    return;
+  }
+
+  openModal(
+    "Editar item",
+
+    `
+      ${field(
+        "Item",
+        "name",
+        "text",
+        item.name,
+        "required"
+      )}
+
+      ${field(
+        "Quantidade",
+        "quantity",
+        "text",
+        item.quantity || ""
+      )}
+
+      ${field(
+        "Categoria",
+        "category",
+        "text",
+        item.category || ""
+      )}
+    `,
+
+    {
+      submit: "Salvar"
+    }
+  );
+
+  modal.querySelector(
+    "#lidire-form"
+  ).onsubmit = (e) => {
+    e.preventDefault();
+
+    const f =
+      new FormData(e.target);
+
+    Object.assign(
+      item,
+      Object.fromEntries(
+        f.entries()
+      )
+    );
+
+    saveState();
+    closeModal();
+    render();
+
+    toast(
+      "Item atualizado."
+    );
+  };
+}
+
+/* =========================================================
+   EVENTOS
+   ========================================================= */
+
+document.addEventListener(
+  "click",
+  (event) => {
+    const pageEl =
+      event.target.closest(
+        "[data-page]"
+      );
+
+    if (pageEl) {
+      event.preventDefault();
+
+      currentPage =
+        pageEl.dataset.page;
+
+      currentShoppingList =
+        null;
+
+      render();
+
+      return;
+    }
+
+    const actionEl =
+      event.target.closest(
+        "[data-action]"
+      );
+
+    if (actionEl) {
+      event.preventDefault();
+
+      handleAction(
+        actionEl.dataset.action,
+        actionEl
+      );
+    }
+  }
+);
+
+document.addEventListener(
+  "click",
+  (event) => {
+    if (
+      event.target.classList.contains(
+        "modal-backdrop"
+      )
+    ) {
+      closeModal();
+    }
+  }
+);
+
+/* =========================================================
+   API PÚBLICA DO LIDIRE
+   ========================================================= */
+
+window.LiDire = {
+  state: () => state,
+
+  save: saveState,
+
+  go: (page) => {
+    currentPage = page;
+    currentShoppingList = null;
+    render();
+  },
+
+  reset: () => {
+    state =
+      cloneDefaultState();
+
+    saveState();
+    render();
+  }
+};
+
+/* =========================================================
+   INICIALIZAÇÃO
+   ========================================================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+    render();
+  }
+);
+
+if (
+  document.readyState !==
+  "loading"
+) {
+  render();
+        }
