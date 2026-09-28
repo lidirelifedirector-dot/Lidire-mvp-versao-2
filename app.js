@@ -1308,3 +1308,1255 @@ function estudos() {
     `
   });
 }
+
+function treinos() {
+  return listPage({
+    key: "treinos",
+
+    title: "Treinos",
+
+    subtitle:
+      "Registre seus movimentos e mantenha constância.",
+
+    eyebrow: "BEM-ESTAR",
+
+    render: (x) => `
+      <div class="list-item">
+
+        <div class="module-icon small">
+          ♢
+        </div>
+
+        <div class="item-main">
+
+          <strong>
+            ${esc(x.name)}
+          </strong>
+
+          <span>
+
+            ${esc(x.type || "Treino")}
+
+            ${
+              x.duration
+                ? ` · ${esc(
+                    x.duration
+                  )} min`
+                : ""
+            }
+
+          </span>
+
+        </div>
+
+        <div class="item-actions">
+
+          <button
+            data-action="edit-treino"
+            data-id="${x.id}"
+          >
+            ${icon("edit")}
+          </button>
+
+          <button
+            data-action="delete-treino"
+            data-id="${x.id}"
+          >
+            ${icon("trash")}
+          </button>
+
+        </div>
+
+      </div>
+    `
+  });
+}
+
+/* =========================================================
+   HIDRATAÇÃO
+   ========================================================= */
+
+function getHydrationTotalToday() {
+  return state.data.hidratacao
+    .filter((x) => {
+      return String(x.createdAt || "").slice(
+        0,
+        10
+      ) === todayISO();
+    })
+    .reduce(
+      (sum, x) =>
+        sum + Number(x.amount || 0),
+      0
+    );
+}
+
+function getHydrationDailyGoal() {
+  const config =
+    state.data.hidratacaoConfig;
+
+  const amount =
+    Number(config.amountPerPeriod || 0);
+
+  const start = timeToMinutes(
+    config.startTime
+  );
+
+  const end = timeToMinutes(
+    config.endTime
+  );
+
+  const interval =
+    Number(config.intervalMinutes || 0);
+
+  if (
+    !amount ||
+    !interval ||
+    end <= start
+  ) {
+    return amount;
+  }
+
+  const periods =
+    Math.floor(
+      (end - start) / interval
+    ) + 1;
+
+  return amount * periods;
+}
+
+function timeToMinutes(time) {
+  if (!time) return 0;
+
+  const [hours, minutes] =
+    time.split(":").map(Number);
+
+  return (
+    Number(hours || 0) * 60 +
+    Number(minutes || 0)
+  );
+}
+
+function hidratacao() {
+  const total =
+    getHydrationTotalToday();
+
+  const goal =
+    getHydrationDailyGoal();
+
+  const pct = goal
+    ? Math.min(
+        100,
+        Math.round(
+          (total / goal) * 100
+        )
+      )
+    : 0;
+
+  const config =
+    state.data.hidratacaoConfig;
+
+  const records =
+    state.data.hidratacao.filter(
+      (x) =>
+        String(
+          x.createdAt || ""
+        ).slice(0, 10) === todayISO()
+    );
+
+  return appShell(`
+    ${pageHeader(
+      "BEM-ESTAR",
+      "Hidratação",
+      "Defina sua rotina de água e acompanhe o consumo.",
+      `
+        <div class="page-header-actions">
+
+          <button
+            class="primary-button compact"
+            data-action="add-hidratacao"
+          >
+            ${icon("plus")}
+            Registrar
+          </button>
+
+          <button
+            class="ghost-button compact"
+            data-action="config-hidratacao"
+          >
+            ${icon("edit")}
+            Meta
+          </button>
+
+        </div>
+      `
+    )}
+
+    <div class="hydration-card">
+
+      <div class="hydration-top">
+
+        <div>
+
+          <span class="eyebrow">
+            HOJE
+          </span>
+
+          <h2>
+            ${total} ml
+          </h2>
+
+          <p>
+            de ${goal} ml de meta
+          </p>
+
+        </div>
+
+        <div class="water-drop">
+          ◉
+        </div>
+
+      </div>
+
+      <div class="progress">
+
+        <span
+          style="width:${pct}%"
+        ></span>
+
+      </div>
+
+      <div class="progress-labels">
+
+        <span>
+          0 ml
+        </span>
+
+        <strong>
+          ${pct}%
+        </strong>
+
+        <span>
+          ${goal} ml
+        </span>
+
+      </div>
+
+      <div class="quick-water">
+
+        ${[200, 300, 500]
+          .map(
+            (value) => `
+              <button
+                data-action="quick-water"
+                data-value="${value}"
+              >
+                +${value} ml
+              </button>
+            `
+          )
+          .join("")}
+
+      </div>
+
+    </div>
+
+    <div class="content-card">
+
+      <div class="card-toolbar">
+
+        <div class="toolbar-title">
+          Meta de hidratação
+        </div>
+
+        <button
+          class="text-button"
+          data-action="config-hidratacao"
+        >
+          Alterar
+        </button>
+
+      </div>
+
+      <div class="hydration-settings-summary">
+
+        <p>
+          <strong>
+            ${config.amountPerPeriod} ml
+          </strong>
+          a cada
+          <strong>
+            ${config.intervalMinutes} min
+          </strong>
+        </p>
+
+        <p>
+          Das
+          <strong>
+            ${esc(config.startTime)}
+          </strong>
+          às
+          <strong>
+            ${esc(config.endTime)}
+          </strong>
+        </p>
+
+      </div>
+
+    </div>
+
+    <div class="content-card">
+
+      <div class="card-toolbar">
+
+        <div class="toolbar-title">
+          Registros de hoje
+        </div>
+
+        <button
+          class="text-button"
+          data-action="reset-hidratacao"
+        >
+          Limpar
+        </button>
+
+      </div>
+
+      ${
+        records.length
+          ? `
+            <div class="item-list">
+
+              ${records
+                .map(
+                  (x) => `
+                    <div class="list-item">
+
+                      <div class="module-icon small">
+                        ◉
+                      </div>
+
+                      <div class="item-main">
+
+                        <strong>
+                          ${x.amount} ml
+                        </strong>
+
+                        <span>
+                          ${new Date(
+                            x.createdAt
+                          ).toLocaleTimeString(
+                            "pt-BR",
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit"
+                            }
+                          )}
+                        </span>
+
+                      </div>
+
+                      <div class="item-actions">
+
+                        <button
+                          data-action="delete-hidratacao"
+                          data-id="${x.id}"
+                        >
+                          ${icon("trash")}
+                        </button>
+
+                      </div>
+
+                    </div>
+                  `
+                )
+                .join("")}
+
+            </div>
+          `
+          : `
+            <p class="muted">
+              Nenhum registro hoje.
+            </p>
+          `
+      }
+
+    </div>
+  `);
+}
+
+/* =========================================================
+   ALIMENTAÇÃO
+   ========================================================= */
+
+function getCaloriesConsumedToday() {
+  return state.data.alimentacao
+    .filter(
+      (x) =>
+        x.date === todayISO()
+    )
+    .reduce(
+      (sum, x) =>
+        sum + Number(x.calories || 0),
+      0
+    );
+}
+
+function getCaloriesRemainingToday() {
+  const goal =
+    Number(
+      state.data.alimentacaoConfig
+        .dailyCalories || 0
+    );
+
+  const consumed =
+    getCaloriesConsumedToday();
+
+  return Math.max(
+    0,
+    goal - consumed
+  );
+}
+
+function alimentacao() {
+  const goal =
+    Number(
+      state.data.alimentacaoConfig
+        .dailyCalories || 0
+    );
+
+  const consumed =
+    getCaloriesConsumedToday();
+
+  const remaining =
+    Math.max(
+      0,
+      goal - consumed
+    );
+
+  const percent = goal
+    ? Math.min(
+        100,
+        Math.round(
+          (consumed / goal) * 100
+        )
+      )
+    : 0;
+
+  const meals =
+    state.data.alimentacao
+      .filter(
+        (x) =>
+          x.date === todayISO()
+      )
+      .sort(
+        (a, b) =>
+          (a.time || "").localeCompare(
+            b.time || ""
+          )
+      );
+
+  return appShell(`
+    ${pageHeader(
+      "BEM-ESTAR",
+      "Alimentação",
+      "Registre suas refeições e acompanhe suas calorias.",
+      `
+        <div class="page-header-actions">
+
+          <button
+            class="primary-button compact"
+            data-action="add-alimentacao"
+          >
+            ${icon("plus")}
+            Refeição
+          </button>
+
+          <button
+            class="ghost-button compact"
+            data-action="config-alimentacao"
+          >
+            ${icon("edit")}
+            Meta
+          </button>
+
+        </div>
+      `
+    )}
+
+    <div class="stats-grid">
+
+      ${statCard(
+        `${consumed} kcal`,
+        "Consumidas hoje",
+        "pink"
+      )}
+
+      ${statCard(
+        `${remaining} kcal`,
+        "Restantes",
+        "cyan"
+      )}
+
+      ${statCard(
+        `${goal} kcal`,
+        "Meta diária",
+        "purple"
+      )}
+
+    </div>
+
+    <div class="content-card">
+
+      <div class="card-toolbar">
+
+        <div>
+          <div class="toolbar-title">
+            Meta diária
+          </div>
+
+          <small class="muted">
+            ${consumed} de ${goal} kcal
+          </small>
+        </div>
+
+        <button
+          class="text-button"
+          data-action="config-alimentacao"
+        >
+          Alterar
+        </button>
+
+      </div>
+
+      <div class="progress">
+
+        <span
+          style="width:${percent}%"
+        ></span>
+
+      </div>
+
+      <div class="progress-labels">
+
+        <span>
+          0 kcal
+        </span>
+
+        <strong>
+          ${percent}%
+        </strong>
+
+        <span>
+          ${goal} kcal
+        </span>
+
+      </div>
+
+    </div>
+
+    <div class="content-card">
+
+      <div class="card-toolbar">
+
+        <div class="toolbar-title">
+          Refeições de hoje
+        </div>
+
+      </div>
+
+      ${
+        meals.length
+          ? `
+            <div class="item-list">
+
+              ${meals
+                .map(
+                  (meal) => `
+                    <div class="list-item">
+
+                      <div class="module-icon small">
+                        🍽️
+                      </div>
+
+                      <div class="item-main">
+
+                        <strong>
+                          ${esc(
+                            meal.mealType
+                          )}
+                        </strong>
+
+                        <span>
+
+                          ${
+                            meal.time
+                              ? `${icon(
+                                  "clock"
+                                )} ${esc(
+                                  meal.time
+                                )}`
+                              : ""
+                          }
+
+                          ${
+                            meal.foods
+                              ? ` · ${esc(
+                                  meal.foods
+                                )}`
+                              : ""
+                          }
+
+                        </span>
+
+                      </div>
+
+                      <strong
+                        class="finance-value expense"
+                      >
+                        ${meal.calories} kcal
+                      </strong>
+
+                      <div class="item-actions">
+
+                        <button
+                          data-action="edit-alimentacao"
+                          data-id="${meal.id}"
+                        >
+                          ${icon("edit")}
+                        </button>
+
+                        <button
+                          data-action="delete-alimentacao"
+                          data-id="${meal.id}"
+                        >
+                          ${icon("trash")}
+                        </button>
+
+                      </div>
+
+                    </div>
+                  `
+                )
+                .join("")}
+
+            </div>
+          `
+          : emptyState(
+              "Nenhuma refeição registrada",
+              "Adicione sua primeira refeição de hoje.",
+              "Adicionar refeição",
+              "add-alimentacao"
+            )
+      }
+
+    </div>
+  `);
+}
+
+function financas() {
+  const income =
+    state.data.financas
+      .filter(
+        (x) => x.type === "income"
+      )
+      .reduce(
+        (s, x) =>
+          s + Number(x.value || 0),
+        0
+      );
+
+  const expense =
+    state.data.financas
+      .filter(
+        (x) => x.type === "expense"
+      )
+      .reduce(
+        (s, x) =>
+          s + Number(x.value || 0),
+        0
+      );
+
+  return listPage({
+    key: "financas",
+
+    title: "Finanças",
+
+    subtitle:
+      "Tenha uma visão simples do que entra e sai.",
+
+    eyebrow: "DINHEIRO",
+
+    stats: () => `
+      ${statCard(
+        money(income),
+        "Entradas",
+        "cyan"
+      )}
+
+      ${statCard(
+        money(expense),
+        "Saídas",
+        "pink"
+      )}
+
+      ${statCard(
+        money(income - expense),
+        "Saldo",
+        "purple"
+      )}
+    `,
+
+    render: (x) => `
+      <div class="list-item">
+
+        <div class="finance-icon ${x.type}">
+          ${
+            x.type === "income"
+              ? "↑"
+              : "↓"
+          }
+        </div>
+
+        <div class="item-main">
+
+          <strong>
+            ${esc(x.title)}
+          </strong>
+
+          <span>
+            ${dateBR(
+              x.date || todayISO()
+            )}
+
+            ·
+
+            ${
+              x.category
+                ? esc(x.category)
+                : "Geral"
+            }
+          </span>
+
+        </div>
+
+        <strong
+          class="finance-value ${x.type}"
+        >
+          ${
+            x.type === "income"
+              ? "+"
+              : "-"
+          }
+
+          ${money(x.value)}
+        </strong>
+
+        <div class="item-actions">
+
+          <button
+            data-action="edit-financa"
+            data-id="${x.id}"
+          >
+            ${icon("edit")}
+          </button>
+
+          <button
+            data-action="delete-financa"
+            data-id="${x.id}"
+          >
+            ${icon("trash")}
+          </button>
+
+        </div>
+
+      </div>
+    `,
+
+    filter: `
+      <button
+        class="filter-button"
+        data-action="add-financa"
+      >
+        + Entrada / saída
+      </button>
+    `
+  });
+}
+
+function objetivos() {
+  return listPage({
+    key: "objetivos",
+
+    title: "Objetivos",
+
+    subtitle:
+      "Dê forma aos planos que você quer realizar.",
+
+    eyebrow: "DIREÇÃO",
+
+    render: (x) => `
+      <div class="goal-item">
+
+        <div class="goal-top">
+
+          <div>
+
+            <strong>
+              ${esc(x.title)}
+            </strong>
+
+            <span>
+              ${
+                x.deadline
+                  ? `Até ${dateBR(
+                      x.deadline
+                    )}`
+                  : "Sem prazo"
+              }
+            </span>
+
+          </div>
+
+          <b>
+            ${Number(
+              x.progress || 0
+            )}%
+          </b>
+
+        </div>
+
+        <div class="progress">
+
+          <span
+            style="width:${Math.min(
+              100,
+              Number(x.progress || 0)
+            )}%"
+          ></span>
+
+        </div>
+
+        <div class="goal-actions">
+
+          <button
+            data-action="progress-objetivo"
+            data-id="${x.id}"
+          >
+            Atualizar progresso
+          </button>
+
+          <button
+            data-action="edit-objetivo"
+            data-id="${x.id}"
+          >
+            Editar
+          </button>
+
+          <button
+            data-action="delete-objetivo"
+            data-id="${x.id}"
+          >
+            Excluir
+          </button>
+
+        </div>
+
+      </div>
+    `
+  });
+}
+
+function familia() {
+  return listPage({
+    key: "familia",
+
+    title: "Família",
+
+    subtitle:
+      "Uma visão compartilhada para organizar a vida juntos.",
+
+    eyebrow: "COMPARTILHAMENTO",
+
+    emptyTitle:
+      "Ainda não há pessoas adicionadas",
+
+    emptyText:
+      "Cadastre pessoas para estruturar sua área familiar.",
+
+    render: (x) => `
+      <div class="list-item">
+
+        <div class="avatar">
+          ${esc(
+            (x.name || "?")
+              .charAt(0)
+              .toUpperCase()
+          )}
+        </div>
+
+        <div class="item-main">
+
+          <strong>
+            ${esc(x.name)}
+          </strong>
+
+          <span>
+
+            ${esc(
+              x.relation || "Membro"
+            )}
+
+            ${
+              x.email
+                ? ` · ${esc(
+                    x.email
+                  )}`
+                : ""
+            }
+
+          </span>
+
+        </div>
+
+        <div class="item-actions">
+
+          <button
+            data-action="edit-familia"
+            data-id="${x.id}"
+          >
+            ${icon("edit")}
+          </button>
+
+          <button
+            data-action="delete-familia"
+            data-id="${x.id}"
+          >
+            ${icon("trash")}
+          </button>
+
+        </div>
+
+      </div>
+    `
+  });
+}
+
+function assistente() {
+  const pending =
+    state.data.tarefas.filter(
+      (x) => !x.done
+    );
+
+  const today =
+    state.data.compromissos.filter(
+      (x) =>
+        x.date === todayISO()
+    );
+
+  return appShell(`
+    ${pageHeader(
+      "INTELIGÊNCIA",
+      "Assistente LiDire",
+      "Uma visão rápida da sua rotina para ajudar você a encontrar o próximo passo."
+    )}
+
+    <div class="assistant-screen">
+
+      <div class="assistant-avatar">
+        ✦
+      </div>
+
+      <h2>
+        Como posso ajudar?
+      </h2>
+
+      <p>
+        Experimente uma das sugestões abaixo.
+      </p>
+
+      <div class="suggestions">
+
+        <button
+          data-action="assistant-question"
+          data-question="O que tenho para hoje?"
+        >
+          O que tenho para hoje?
+        </button>
+
+        <button
+          data-action="assistant-question"
+          data-question="Quais tarefas estão pendentes?"
+        >
+          Quais tarefas estão pendentes?
+        </button>
+
+        <button
+          data-action="assistant-question"
+          data-question="Como está minha rotina?"
+        >
+          Como está minha rotina?
+        </button>
+
+      </div>
+
+      <div
+        id="assistant-response"
+        class="assistant-response"
+      >
+
+        <strong>
+          Resumo atual
+        </strong>
+
+        <p>
+          Você tem
+          <b>${pending.length}</b>
+          tarefa(s) pendente(s) e
+          <b>${today.length}</b>
+          compromisso(s) hoje.
+        </p>
+
+      </div>
+
+    </div>
+  `);
+}
+
+function explorar() {
+  return appShell(`
+    ${pageHeader(
+      "LIDIRE",
+      "Tudo em um só lugar",
+      "Conheça os espaços que ajudam a transformar rotina em clareza."
+    )}
+
+    <div class="explore-grid">
+
+      ${modules
+        .map(moduleCard)
+        .join("")}
+
+      <button
+        class="module-card featured"
+        data-page="assistente"
+      >
+
+        <span class="module-icon">
+          ✦
+        </span>
+
+        <span class="module-content">
+
+          <strong>
+            Assistente LiDire
+          </strong>
+
+          <small>
+            Seu copiloto para organizar a rotina.
+          </small>
+
+        </span>
+
+        <span class="module-arrow">
+          ${icon("arrow")}
+        </span>
+
+      </button>
+
+    </div>
+  `);
+}
+
+function perfil() {
+  const hasPhoto =
+    Boolean(state.user.photo);
+
+  return appShell(`
+    ${pageHeader(
+      "MINHA CONTA",
+      "Perfil",
+      "Personalize sua experiência na LiDire."
+    )}
+
+    <div class="profile-card">
+
+      <div class="profile-avatar-large">
+
+        ${
+          hasPhoto
+            ? `
+              <img
+                src="${esc(
+                  state.user.photo
+                )}"
+                alt="Foto de perfil"
+              >
+            `
+            : `
+              ${esc(
+                (
+                  state.user.name ||
+                  "A"
+                )
+                  .charAt(0)
+                  .toUpperCase()
+              )}
+            `
+        }
+
+      </div>
+
+      <h2>
+        ${esc(
+          state.user.name ||
+            "Seu nome"
+        )}
+      </h2>
+
+      <p>
+        ${esc(
+          state.user.email ||
+            "Adicione seu e-mail"
+        )}
+      </p>
+
+      <div class="profile-photo-actions">
+
+        <button
+          class="primary-button"
+          data-action="add-profile-photo"
+        >
+          ${icon("camera")}
+          ${
+            hasPhoto
+              ? "Alterar foto"
+              : "Adicionar foto"
+          }
+        </button>
+
+        ${
+          hasPhoto
+            ? `
+              <button
+                class="ghost-button"
+                data-action="delete-profile-photo"
+              >
+                ${icon("trash")}
+                Excluir foto
+              </button>
+            `
+            : ""
+        }
+
+      </div>
+
+      <button
+        class="primary-button"
+        data-action="edit-profile"
+      >
+        ${icon("edit")}
+        Editar perfil
+      </button>
+
+    </div>
+
+    <div class="settings-card">
+
+      <button
+        data-action="edit-profile"
+      >
+
+        <span>✎</span>
+
+        <div>
+
+          <strong>
+            Dados pessoais
+          </strong>
+
+          <small>
+            Nome, e-mail, idade e telefone
+          </small>
+
+        </div>
+
+        ${icon("arrow")}
+
+      </button>
+
+      <button
+        data-action="clear-local"
+      >
+
+        <span>↺</span>
+
+        <div>
+
+          <strong>
+            Redefinir dados locais
+          </strong>
+
+          <small>
+            Apaga os dados salvos neste dispositivo
+          </small>
+
+        </div>
+
+        ${icon("arrow")}
+
+      </button>
+
+    </div>
+  `);
+}
+
+const pages = {
+  inicio: home,
+  agenda,
+  tarefas,
+  compras,
+  estudos,
+  treinos,
+  hidratacao,
+  alimentacao,
+  financas,
+  objetivos,
+  familia,
+  assistente,
+  explorar,
+  perfil
+};
+
+function render() {
+  const root =
+    document.getElementById("app");
+
+  if (!root) {
+    console.error(
+      "Elemento #app não encontrado."
+    );
+    return;
+  }
+
+  if (
+    currentPage === "compras" &&
+    currentShoppingList
+  ) {
+    root.innerHTML =
+      listaCompras(
+        currentShoppingList
+      );
+  } else {
+    root.innerHTML =
+      (
+        pages[currentPage] ||
+        home
+      )();
+  }
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+        }
