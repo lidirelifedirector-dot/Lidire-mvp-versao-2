@@ -23,6 +23,7 @@ const defaultState = {
 
 let state = loadState();
 let currentPage = "início";
+let currentShoppingList = null;
 let modal = null;
 
 function loadState() {
